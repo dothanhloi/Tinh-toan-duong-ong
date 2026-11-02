@@ -145,6 +145,17 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
 
   <!-- ========== SYSTEM MODE ========== -->
   <div id="form-sys">
+    <details class="guide" style="margin:0 0 6px">
+      <summary>Hướng dẫn nhanh</summary>
+      <ol class="help" style="padding-left:18px;margin:6px 0 0">
+        <li><b>Mạng ống</b>: mỗi dòng là 1 đoạn ống đi từ Bơm hoặc một điểm có sẵn tới điểm mới (Đ1, Đ2…). Rẽ nhánh = nhiều đoạn cùng đi từ 1 điểm. Cao độ tính so với bơm (+ cao hơn, − thấp hơn).</li>
+        <li><b>Các khu tưới</b>: thêm từng khu và chọn điểm khu nối vào. ✎ sửa chi tiết, ⧉ nhân bản, × xóa.</li>
+        <li><b>Khung “Đang sửa”</b>: chọn cây trồng (app điền sẵn khoảng cách, tán, đầu tưới), rồi sửa số cây/hàng, số hàng, tán, đầu tưới, độ dốc theo vườn.</li>
+        <li><b>Nhu cầu nước</b>: chọn vùng, loại đất, chu kỳ tưới; cả vườn phải tưới xong 1 vòng trong chu kỳ.</li>
+        <li><b>Vận hành &amp; chi phí</b>: nguồn nước tối đa, giờ bơm/ngày, giá bơm, giá điện, giá ống.</li>
+        <li><b>Kết quả</b> (bên phải, trên điện thoại ở phía dưới): ★ là phương án rẻ nhất; bấm một phương án để xem cỡ ống từng đoạn, lịch tưới, mặt cắt áp; ⚠ là chỗ cần sửa.</li>
+      </ol>
+    </details>
     <h3 style="margin-top:4px">1. Mạng ống chính &amp; các nhánh</h3>
     <div class="table-wrap">
       <table class="segtbl" aria-label="Các đoạn ống chính và nhánh">
@@ -365,6 +376,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
       </div>
       <p class="help">Đầu tưới thường (không bù áp): giữ dao động áp trong khu ≤ 20% để lưu lượng các đầu chênh ≤ ~10%. Đầu bù áp: áp trong khu chỉ cần nằm giữa áp làm việc tối thiểu và áp tối đa của đầu. Tổn thất cho phép ống chính càng lớn thì ống càng nhỏ, đổi lại bơm mạnh hơn và tốn điện hơn.</p>
     </details>
+    <div style="margin-top:14px"><button class="btn" id="resetAll" type="button">↺ Làm lại từ ví dụ mẫu</button></div>
   </div>
 
   <!-- ========== ONE SEGMENT MODE ========== -->
@@ -1860,6 +1872,12 @@ function setTab(m){
   $("form-one").classList.toggle("hidden", m !== "one");
   recalc();
 }
+$("resetAll").addEventListener("click", () => {
+  if (!confirm("Xóa toàn bộ dữ liệu đã nhập và quay về ví dụ mẫu?")) return;
+  clearTimeout(tmr);
+  try { ["tinh-ong-tuoi-v4", "tinh-ong-tuoi-v3", "tinh-ong-tuoi-v2"].forEach(k => localStorage.removeItem(k)); } catch(e) {}
+  location.reload();
+});
 $("tab-sys").addEventListener("click", () => setTab("sys"));
 $("tab-one").addEventListener("click", () => setTab("one"));
 

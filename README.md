@@ -17,6 +17,7 @@
 
 ## Cách dùng
 Mở `index.html` bằng trình duyệt (máy tính hoặc điện thoại). Có thể đưa lên GitHub Pages hoặc chèn vào website WordPress.
+Hướng dẫn chi tiết từng bước: xem [HUONG_DAN.md](HUONG_DAN.md). Trong app có mục “Hướng dẫn nhanh” ở đầu khung nhập liệu và nút “Làm lại từ ví dụ mẫu”.
 
 ## Công thức chính
 - Tổn thất Hazen–Williams `h = 10,67·L·Q^1,852 / (C^1,852·D^4,87)`, cộng tổn thất cục bộ (%).
