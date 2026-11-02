@@ -41,7 +41,7 @@ main{max-width:1180px;margin:0 auto;padding:8px 16px 40px;display:grid;gap:16px;
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
 label{display:block;font-size:.85rem;color:var(--muted)}
-label.full{grid-column:1/-1}
+label.full,.grid2 .full{grid-column:1/-1}
 label small{display:block;font-size:.75rem;opacity:.85}
 input,select{width:100%;margin-top:2px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:var(--input);color:var(--ink);font:inherit}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:0}
@@ -77,6 +77,9 @@ th:first-child,td:first-child{text-align:left}
 td.wrap,th.wrap{white-space:normal;text-align:left;min-width:200px}
 td.l,th.l{text-align:left}
 tr.pick td{background:var(--accent-soft);font-weight:700}
+tr.main td{border-bottom:none;padding-bottom:1px}
+tr.sub td{white-space:normal;text-align:left;color:var(--muted);font-size:.8rem;padding-top:0}
+tr.sub .stick{position:sticky;left:8px;max-width:min(600px, calc(100vw - 80px))}
 tr.sel td{background:var(--accent-soft)}
 tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .segtbl th,.segtbl td{padding:3px 4px;text-align:left}
@@ -164,11 +167,25 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
 
     <div class="zedit" aria-label="Sửa chi tiết khu">
       <div class="zedit-h">✎ Đang sửa: <span id="zeName"></span></div>
-      <div class="presets" aria-label="Mẫu cây trồng">
-        <button data-preset="cafe_drip">Cà phê – nhỏ giọt</button>
-        <button data-preset="cafe_bec">Cà phê – béc gốc</button>
-        <button data-preset="tieu_drip">Tiêu – nhỏ giọt</button>
-        <button data-preset="saurieng_bec">Sầu riêng – béc</button>
+      <div class="grid2" style="margin-top:8px">
+        <label class="full">Cây trồng
+          <select id="crop"></select>
+          <small>Chọn cây sẽ điền sẵn khoảng cách, đường kính tán, kiểu và số đầu tưới phù hợp; sửa lại theo vườn của bạn.</small>
+        </label>
+        <label>Đường kính tán hiện tại (m)
+          <input id="canopy" type="number" min="0.2" step="0.1">
+          <small>Cây non tán nhỏ thì cần ít nước hơn</small>
+        </label>
+        <label>Lượng nước mỗi lần tưới
+          <select id="waterMode">
+            <option value="auto">Theo nhu cầu cây (tự tính)</option>
+            <option value="manual">Tự nhập</option>
+          </select>
+        </label>
+        <label id="lptWrap" class="full">Lượng nước / gốc / lần tưới (lít)
+          <input id="litersPerTree" type="number" min="0" step="5">
+        </label>
+        <div id="zeWater" class="full help" style="margin:0"></div>
       </div>
 
       <h3>Kiểu tưới &amp; đầu tưới</h3>
@@ -197,9 +214,6 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
         <label id="pcMaxWrap" class="full hidden">Áp tối đa đầu bù áp còn ổn định (m)
           <input id="HmaxPC" type="number" min="5" step="1">
           <small>Xem thông số nhà sản xuất, thường 25–40 m (2,5–4 bar). Áp làm việc ở trên là áp tối thiểu.</small>
-        </label>
-        <label class="full">Lượng nước / gốc / lần tưới (lít)
-          <input id="litersPerTree" type="number" min="0" step="5">
         </label>
       </div>
 
@@ -246,7 +260,32 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
       </div>
     </div>
 
-    <h3>3. Phương án vận hành</h3>
+    <h3>3. Nhu cầu nước tưới</h3>
+    <div class="grid2">
+      <label class="full">Vùng khí hậu
+        <select id="region"></select>
+      </label>
+      <label>Bốc thoát hơi ETo cao điểm mùa khô (mm/ngày)
+        <input id="eto" type="number" min="1" max="10" step="0.1" value="5">
+        <small>Lấy số trạm khí tượng gần vườn nếu có</small>
+      </label>
+      <label>Loại đất
+        <select id="soil"></select>
+      </label>
+      <label>Chu kỳ tưới: tưới lại sau (ngày)
+        <input id="maxDays" type="number" min="0.5" step="0.5" value="3">
+        <small>Cả vườn phải tưới xong 1 vòng trong chu kỳ này</small>
+      </label>
+      <label>Mức tưới so với nhu cầu (%)
+        <input id="level" type="number" min="30" max="130" step="5" value="100">
+        <small>100% = đủ cho năng suất tối đa</small>
+      </label>
+      <label>Số ngày cần tưới / năm (mùa khô)
+        <input id="irrDays" type="number" min="0" max="365" step="5" value="120">
+      </label>
+    </div>
+
+    <h3>4. Phương án vận hành</h3>
     <div class="grid2">
       <label class="full">Phương án xem chi tiết
         <select id="turns"><option value="auto">★ Tự chọn phương án kinh tế nhất</option></select>
@@ -265,15 +304,9 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
       <label>Số giờ bơm tối đa / ngày
         <input id="hoursPerDay" type="number" min="1" max="24" step="1" value="20">
       </label>
-      <label>Phải tưới xong 1 vòng trong (ngày)
-        <input id="maxDays" type="number" min="0.5" step="0.5" value="3">
-      </label>
-      <label>Số lần tưới / năm
-        <input id="seasons" type="number" min="0" step="1" value="12">
-      </label>
     </div>
 
-    <h3>4. Bơm &amp; chi phí</h3>
+    <h3>5. Bơm &amp; chi phí</h3>
     <div class="grid2">
       <label>Độ sâu hút: mặt nước → bơm (m)
         <input id="suction" type="number" min="0" step="0.5" value="4">
@@ -388,6 +421,8 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
     <h2>Cách tính</h2>
     <ul class="help">
       <li><b>Mỗi khu</b> được thiết kế riêng: ống tưới và ống nhánh cấp 2 tính <b>từng đầu tưới một</b> (lưu lượng giảm dần, cộng/trừ chênh cao theo độ dốc), cho ra lưu lượng khu, áp cần tại điểm nối và thời gian tưới (= lượng nước/gốc ÷ lưu lượng mỗi gốc).</li>
+      <li><b>Nhu cầu nước</b> mỗi cây (lít/ngày) = ETo × Kc × Kr × diện tích mỗi cây ÷ hiệu suất tưới (nhỏ giọt 90%, béc 80%) × mức tưới. ETo là lượng bốc thoát hơi chuẩn lúc cao điểm mùa khô của vùng; Kc là hệ số cây trồng (FAO-56, hồ tiêu theo thí nghiệm ở Tây Nguyên); Kr giảm theo độ che phủ của tán (trung bình công thức Keller–Karmeli và Freeman–Garzoli), nên cây non cần ít nước hơn. Lượng mỗi lần tưới = nhu cầu ngày × chu kỳ.</li>
+      <li><b>Giữ ẩm</b>: số ngày tối đa giữa 2 lần tưới = nước dễ hút của đất (mm/m) × độ sâu rễ × tỷ lệ cho phép cạn (p) × phần diện tích được làm ướt ÷ nhu cầu hằng ngày. Đầu tưới nên làm ướt ít nhất khoảng 1/3 diện tích mỗi cây.</li>
       <li><b>Tổn thất áp</b> theo Hazen–Williams: h = 10,67·L·Q<sup>1,852</sup> / (C<sup>1,852</sup>·D<sup>4,87</sup>).</li>
       <li><b>Lưu lượng</b> mỗi đoạn ống chính = tổng lưu lượng các khu phía sau đoạn đó <b>đang mở trong cùng một lượt</b>. Ống được chọn theo lượt có lưu lượng lớn nhất qua đoạn.</li>
       <li><b>Mạng ống chính &amp; nhánh</b>: mỗi đoạn được chia nhỏ. Ứng dụng duyệt mọi cách phối cỡ ống (nhánh không to hơn ống phía trước) và chọn cách <b>rẻ nhất</b> thỏa các điều kiện: vận tốc ≤ giới hạn; khu nào cũng đủ áp; mọi điểm trên tuyến (kể cả đỉnh đồi) còn ≥ áp tối thiểu; cột áp bơm không vượt mức cần cho điểm khó nhất cộng phần tổn thất cho phép.</li>
@@ -417,17 +452,72 @@ const PN_LIST = [4,5,6,8,10,12.5,16];
 const STD_HP = [0.5,1,1.5,2,3,4,5,5.5,7.5,10,15,20,25,30,40,50,60,75,100,125,150];
 
 /* ---- zones: every zone carries its own parameters ---- */
-const ZF = ["type","ePerTree","qe","He","pc","HmaxPC","rowSp","treeSp","treesPerRow","rows","feed","subFeed","slopeRow","slopeSub","matLat","matSub","litersPerTree"];
-const ZDEF = {type:"drip", ePerTree:2, qe:8, He:10, pc:"0", HmaxPC:30, rowSp:3, treeSp:3, treesPerRow:40, rows:25,
+const ZF = ["crop","canopy","waterMode","type","ePerTree","qe","He","pc","HmaxPC","rowSp","treeSp","treesPerRow","rows","feed","subFeed","slopeRow","slopeSub","matLat","matSub","litersPerTree"];
+const ZDEF = {crop:"cafe_voi", canopy:2.8, waterMode:"auto", type:"drip", ePerTree:4, qe:4, He:10, pc:"0", HmaxPC:30, rowSp:3, treeSp:3, treesPerRow:40, rows:25,
               feed:"mid", subFeed:"end", slopeRow:0, slopeSub:0, matLat:"ldpe", matSub:"pvc", litersPerTree:40};
-/* crop presets change the crop / emitter / spacing / water, never the size of the zone */
-const PRESETS = {
-  cafe_drip:   {type:"drip", ePerTree:2, qe:8,  He:10, pc:"0", rowSp:3,   treeSp:3,   feed:"mid", litersPerTree:40,  matLat:"ldpe", matSub:"pvc"},
-  cafe_bec:    {type:"bec",  ePerTree:1, qe:90, He:20, pc:"0", rowSp:3,   treeSp:3,   feed:"mid", litersPerTree:250, matLat:"hdpe", matSub:"pvc"},
-  tieu_drip:   {type:"drip", ePerTree:2, qe:4,  He:10, pc:"1", rowSp:2.5, treeSp:2.5, feed:"mid", litersPerTree:20,  matLat:"ldpe", matSub:"pvc"},
-  saurieng_bec:{type:"bec",  ePerTree:2, qe:120,He:20, pc:"0", rowSp:8,   treeSp:8,   feed:"end", litersPerTree:300, matLat:"hdpe", matSub:"pvc"}
+
+/* Crop water data for mature trees in the dry season (reference values, adjust to local advice).
+   Kc: crop coefficient for a full canopy (FAO-56; pepper from field trials in the Central Highlands);
+   canopy: typical mature canopy diameter (m); Zr: effective root depth (m); p: allowable depletion. */
+const DRIP = (e, q, pc="0") => ({type:"drip", ePerTree:e, qe:q, He:10, pc, feed:"mid", matLat:"ldpe", matSub:"pvc"});
+const BEC  = (e, q) => ({type:"bec", ePerTree:e, qe:q, He:20, pc:"0", feed:"end", matLat:"hdpe", matSub:"pvc"});
+const CROPS = {
+  cafe_voi:   {name:"Cà phê vối (Robusta)", Kc:0.90, canopy:2.8, rowSp:3,   treeSp:3,   Zr:0.8, p:0.50, sys:DRIP(4,4),
+               note:"Tháng 1–4 là giai đoạn cần nước nhất. Tưới đợt đầu khi mầm hoa đã phân hóa đủ để hoa nở đồng loạt. Tủ gốc giảm khoảng 1/3 lượng nước mà không giảm năng suất."},
+  cafe_che:   {name:"Cà phê chè (Arabica)", Kc:0.90, canopy:1.8, rowSp:2.5, treeSp:1.5, Zr:0.6, p:0.45, sys:DRIP(2,4),
+               note:"Trồng dày, rễ nông hơn cà phê vối; giữ ẩm đều trong mùa khô, nhất là lúc ra hoa và trái non."},
+  ho_tieu:    {name:"Hồ tiêu", Kc:0.90, canopy:1.5, rowSp:3,   treeSp:3,   Zr:0.5, p:0.40, sys:DRIP(2,4,"1"),
+               note:"Rễ cạn, rất sợ úng: tưới vừa đủ, thoát nước tốt. Nhiều vườn hãm nước 30–45 ngày khi phân hóa mầm hoa. Kc đo ở Tây Nguyên: 0,8–1,02 (phân hóa mầm hoa), 1,1–1,2 (ra hoa, đậu quả), 0,83–0,93 (quả chín)."},
+  sau_rieng:  {name:"Sầu riêng", Kc:0.85, canopy:7, rowSp:8, treeSp:8, Zr:0.8, p:0.40, sys:BEC(2,120),
+               note:"Khi xử lý ra hoa phải siết nước theo kỹ thuật riêng. Khi nuôi trái giữ ẩm đều, tránh tăng giảm nước đột ngột."},
+  bo:         {name:"Bơ", Kc:0.85, canopy:6, rowSp:7, treeSp:7, Zr:0.6, p:0.35, sys:BEC(2,70),
+               note:"Rễ cạn, rất dễ thối rễ khi úng: chia nhỏ lượng nước, tưới thường xuyên, thoát nước tốt."},
+  mac_ca:     {name:"Mắc ca", Kc:0.75, canopy:5, rowSp:8, treeSp:6, Zr:0.6, p:0.50, sys:BEC(2,60),
+               note:"Chịu hạn khá; cần đủ nước giai đoạn ra hoa và nuôi hạt."},
+  dieu:       {name:"Điều", Kc:0.75, canopy:7, rowSp:8, treeSp:8, Zr:1.0, p:0.60, sys:BEC(2,90),
+               note:"Chịu hạn tốt; tưới bổ sung mùa khô giúp đậu quả, tăng năng suất."},
+  xoai:       {name:"Xoài", Kc:0.80, canopy:5, rowSp:6, treeSp:6, Zr:1.0, p:0.50, sys:BEC(1,90),
+               note:"Cần khô hạn để phân hóa mầm hoa; tưới lại khi đã đậu trái non."},
+  co_mui:     {name:"Cây có múi (cam, quýt, bưởi)", Kc:0.75, canopy:4, rowSp:5, treeSp:5, Zr:0.6, p:0.50, sys:BEC(1,90),
+               note:"Cần ẩm đều; thiếu nước lúc trái lớn dễ rụng trái, nứt trái."},
+  nhan_vai:   {name:"Nhãn, vải", Kc:0.75, canopy:6, rowSp:7, treeSp:7, Zr:0.8, p:0.50, sys:BEC(2,70),
+               note:"Cần giai đoạn khô (vải cần thêm lạnh) để ra hoa; tưới đều khi đậu quả."},
+  chom_chom:  {name:"Chôm chôm", Kc:0.85, canopy:7, rowSp:8, treeSp:8, Zr:0.8, p:0.40, sys:BEC(2,90),
+               note:"Siết nước nhẹ trước khi ra hoa; giữ ẩm đều khi nuôi trái."},
+  mit:        {name:"Mít", Kc:0.80, canopy:5, rowSp:6, treeSp:6, Zr:0.8, p:0.40, sys:BEC(1,90),
+               note:"Rất nhạy úng; tưới vừa đủ."},
+  chuoi:      {name:"Chuối", Kc:1.10, canopy:2.5, rowSp:2.5, treeSp:2.5, Zr:0.5, p:0.35, sys:DRIP(2,8),
+               note:"Cần nhiều nước và ẩm liên tục; rễ cạn nên tưới dày."},
+  thanh_long: {name:"Thanh long (tính theo trụ)", Kc:0.50, canopy:1.5, rowSp:3, treeSp:3, Zr:0.3, p:0.50, sys:DRIP(2,4),
+               note:"Chịu hạn tốt nhưng cần tưới đều để ra hoa, nuôi trái (nhất là vụ nghịch); tránh úng."},
+  chanh_day:  {name:"Chanh dây (giàn)", Kc:0.85, canopy:3, rowSp:4, treeSp:3, Zr:0.4, p:0.35, sys:DRIP(2,8),
+               note:"Rễ cạn, cần ẩm đều; úng dễ thối rễ."},
+  ca_cao:     {name:"Ca cao", Kc:1.00, canopy:2.5, rowSp:3, treeSp:3, Zr:0.6, p:0.40, sys:DRIP(2,8),
+               note:"Ưa ẩm và cần che bóng; không để khô hạn kéo dài."},
+  oi:         {name:"Ổi", Kc:0.80, canopy:3.5, rowSp:4, treeSp:4, Zr:0.6, p:0.50, sys:DRIP(4,8),
+               note:"Cần ẩm đều để trái lớn đều."}
 };
-const mkZone = (name, point, preset, extra) => ({...ZDEF, ...PRESETS[preset], name, point, count:1, turn:1, ...extra});
+/* Peak dry-season reference evapotranspiration (mm/day), rough regional values */
+const REGIONS = [
+  {id:"taynguyen", name:"Tây Nguyên (Đắk Lắk, Đắk Nông, Gia Lai, Kon Tum)", eto:5.0},
+  {id:"lamdong",   name:"Lâm Đồng (Bảo Lộc, Di Linh, Lâm Hà, Đà Lạt)", eto:4.0},
+  {id:"dnb",       name:"Đông Nam Bộ (Bình Phước, Đồng Nai, Bà Rịa – Vũng Tàu)", eto:5.0},
+  {id:"ntb",       name:"Nam Trung Bộ khô hạn (Ninh Thuận, Bình Thuận)", eto:6.0},
+  {id:"mientrung", name:"Duyên hải miền Trung (Quảng Nam – Khánh Hòa)", eto:4.5},
+  {id:"dbscl",     name:"Đồng bằng sông Cửu Long", eto:4.5},
+  {id:"bac",       name:"Miền Bắc, Bắc Trung Bộ (Sơn La, Bắc Giang, Nghệ An…)", eto:4.0},
+  {id:"custom",    name:"Tự nhập ETo", eto:null}
+];
+/* awc: available water (mm per m of soil); dw: wetted diameter of one drip emitter (m) */
+const SOILS = {
+  bazan: {name:"Đất đỏ bazan", awc:120, dw:1.2},
+  xam:   {name:"Đất xám, cát pha", awc:90, dw:0.8},
+  cat:   {name:"Đất cát", awc:60, dw:0.6},
+  phusa: {name:"Đất phù sa, đất thịt", awc:150, dw:1.1},
+  set:   {name:"Đất sét nặng", awc:160, dw:1.4}
+};
+const cropFields = id => { const c = CROPS[id]; return c ? {...c.sys, rowSp:c.rowSp, treeSp:c.treeSp, canopy:c.canopy, crop:id, waterMode:"auto"} : {}; };
+const mkZone = (name, point, cropId, extra) => ({...ZDEF, ...cropFields(cropId), name, point, count:1, turn:1, ...extra});
 
 /* Network: each row is a pipe from point `from` (0 = pump) to a new point (row index + 1) */
 let NET = [
@@ -437,14 +527,14 @@ let NET = [
   {from:1, L:220, z:-3}
 ];
 let ZONES = [
-  mkZone("Cà phê A", 2, "cafe_drip", {treesPerRow:40, rows:25, turn:1}),
-  mkZone("Cà phê B", 3, "cafe_drip", {treesPerRow:36, rows:22, slopeSub:-1, turn:2}),
-  mkZone("Cà phê C", 2, "cafe_drip", {treesPerRow:30, rows:30, turn:2}),
-  mkZone("Sầu riêng", 4, "saurieng_bec", {treesPerRow:20, rows:5, turn:1}),
-  mkZone("Tiêu", 4, "tieu_drip", {treesPerRow:60, rows:20, turn:3})
+  mkZone("Cà phê A", 2, "cafe_voi", {treesPerRow:40, rows:25, turn:1}),
+  mkZone("Cà phê B", 3, "cafe_voi", {treesPerRow:36, rows:22, slopeSub:-1, turn:2}),
+  mkZone("Cà phê C", 2, "cafe_voi", {treesPerRow:30, rows:30, turn:2}),
+  mkZone("Sầu riêng", 4, "sau_rieng", {treesPerRow:20, rows:5, turn:1}),
+  mkZone("Tiêu", 4, "ho_tieu", {treesPerRow:60, rows:20, turn:3})
 ];
 let ZSEL = 0;            // zone being edited
-const SEL = {want:null, path:null, turn:null, key:null, jOpen:false};
+const SEL = {want:null, path:null, turn:null, key:null, jOpen:false, cropOpen:true};
 let CUR = null;          // detailed result of the plan being viewed
 let ALTS = null;         // all plans (comparison chart)
 
@@ -547,10 +637,50 @@ function designZone(z){
   const sub = designLine({halves:subHalves, qOut:rowQ, s:rowSp, mat:matSub, vmax, allow:subAllow, Hreq:lat.use.Hin, minorPct:num("minor")});
 
   lat.pc = sub.pc = pc;
-  const T = N("litersPerTree") > 0 ? N("litersPerTree")/(e*qe) : 0;
-  return {pc, lat, sub, e, qe, He, tpr, rows, rowSp, treeSp, feedMid, subMid, slopeRow, slopeSub, allowTotal, T,
+  const W = waterNeed(z, e, qe, rowSp, treeSp);
+  const T = W.perEvent > 0 ? W.perEvent/(e*qe) : 0;
+  W.T = T;
+  W.warn = [];
+  if (W.crop){
+    if (W.cycle > W.Imax + 1e-9) W.warn.push(`Chu kỳ ${fmt(W.cycle, W.cycle % 1 ? 1 : 0)} ngày dài hơn khả năng giữ ẩm của vùng rễ được làm ướt (tối đa ~${fmt(Math.max(0.1, W.Imax),1)} ngày): tưới dày hơn hoặc thêm đầu tưới`);
+    if (W.Pw < W.PwMin - 1e-9) W.warn.push(`Đầu tưới chỉ làm ướt ${fmt0(W.Pw*100)}% diện tích mỗi cây, nên ≥ ${fmt0(W.PwMin*100)}%: tăng số đầu tưới hoặc dùng béc`);
+    if (!W.auto && W.need > 0 && W.perEvent < 0.8*W.need) W.warn.push(`Lượng tự nhập chỉ đáp ứng khoảng ${fmt0(W.perEvent/W.need*100)}% nhu cầu (${fmt0(W.need)} lít/cây/lần)`);
+  }
+  if (T > num("hoursPerDay") + 1e-9) W.warn.push(`Mỗi lần tưới khu này mất ${fmt(T,1)} giờ, quá số giờ bơm/ngày: tăng số đầu tưới hoặc lưu lượng đầu tưới, hoặc rút ngắn chu kỳ`);
+  return {pc, lat, sub, e, qe, He, tpr, rows, rowSp, treeSp, feedMid, subMid, slopeRow, slopeSub, allowTotal, T, W,
           zoneQ: sub.Qtot, Hzone: sub.use.Hin, zoneTrees: tpr*rows, areaHa: tpr*rows*rowSp*treeSp/1e4,
           ok: !!(lat.pick && sub.pick)};
+}
+
+/* Water per tree: ETo × Kc × Kr × area / efficiency (FAO-56 with a canopy-cover reduction for micro-irrigation).
+   Kr = mean of Keller–Karmeli (Gc/0.85) and Freeman–Garzoli (Gc + ½(1 − Gc)), capped at 1. */
+function waterNeed(z, e, qe, rowSp, treeSp){
+  const crop = CROPS[z.crop] || null;
+  const A = rowSp*treeSp, isBec = z.type === "bec";
+  const soil = SOILS[$("soil").value] || SOILS.bazan;
+  const ETo = Math.max(0, num("eto"));
+  const cycle = Math.max(0.5, num("maxDays") || 1);
+  const level = Math.max(0, num("level"))/100;
+  const Ea = isBec ? 0.80 : 0.90;
+  const dRaw = parseFloat(z.canopy);
+  const d = isFinite(dRaw) && dRaw > 0 ? dRaw : (crop ? crop.canopy : 0);
+  const Gc = Math.min(1, Math.PI*d*d/4/A);
+  const Kr = Math.min(1, (Math.min(1, Gc/0.85) + Gc + 0.5*(1 - Gc))/2);
+  const dw = isBec ? 4 : soil.dw;                                  // mini-sprinkler wets ~4 m across
+  const Pw = Math.min(1, e*Math.PI*dw*dw/4/A);
+  const PwMin = Math.min(0.33, Math.max(0.15, Gc));
+  const manualL = Math.max(0, parseFloat(z.litersPerTree) || 0);
+  const W = {crop, cropId:z.crop, A, Gc, Kr, d, ETo, cycle, level, Ea, Pw, PwMin, soil, isBec, auto:false, need:0, gross:0, net:0, Imax:Infinity};
+  if (crop){
+    const ETc = ETo*crop.Kc*Kr;                                     // mm/day over the tree's area
+    Object.assign(W, {Kc:crop.Kc, ETc, net:ETc*A, gross:ETc*A*level/Ea, Zr:crop.Zr, p:crop.p,
+      Imax: ETc > 0 ? soil.awc*crop.Zr*crop.p*Pw/ETc : Infinity});
+    W.need = W.gross*cycle;
+  }
+  W.auto = !!crop && z.waterMode !== "manual";
+  W.perEvent = W.auto ? W.need : manualL;
+  W.daily = W.perEvent/cycle;
+  return W;
 }
 
 /* ================== Network (tree) model ================== */
@@ -830,12 +960,12 @@ function evalAlt(ctx, plan, opt={}){
   const kW = 9.81*(Qmax/3600)*TDHmax/ctx.eta, HP = kW/0.746;
   const pickHP = STD_HP.find(h => h >= HP*1.1) || Math.ceil(HP*1.1);
   const roundHours = turns.reduce((a,x) => a + x.D, 0);
-  const energyYear = turns.reduce((a,x) => a + x.kWh, 0)*ctx.seasons*ctx.elecPrice;
+  const energyYear = turns.reduce((a,x) => a + x.kWh, 0)*ctx.rounds*ctx.elecPrice;
   const pumpCost = pickHP*ctx.pumpPrice;
   const days = roundHours/ctx.hoursPerDay;
   const flags = [];
   if (Qmax > ctx.sourceQ + 1e-9) flags.push({hard:true, text:`vượt nguồn nước ${fmt0(ctx.sourceQ)} m³/h`});
-  if (days > ctx.maxDays + 1e-9) flags.push({hard:true, text:`quá ${fmt(ctx.maxDays, ctx.maxDays % 1 ? 1 : 0)} ngày`});
+  if (days > ctx.maxDays + 1e-9) flags.push({hard:true, text:`không kịp tưới hết vườn trong chu kỳ ${fmt(ctx.maxDays, ctx.maxDays % 1 ? 1 : 0)} ngày`});
   if (pickHP > 3) flags.push({hard:false, text:"cần điện 3 pha"});
   const res = {...base, ok:true, size:sol.size, lossD:sol.loss, pipeCost:sol.cost, turns, Qmax, TDHmax, kW, HP, pickHP,
     pumpCost, energyYear, roundHours, days, flags, hard: flags.some(f => f.hard),
@@ -871,7 +1001,7 @@ function makeCtx(){
   return {...farm, mat, cat, sizes, how: $("assign").value,
     vmax: num("vmax") || 1.5, minP: num("minP"), mult: 1 + num("minor")/100, J: num("Jmain") || 2,
     suction: num("suction"), Hf: num("Hfilter"), eta: Math.max(0.2, num("eta")/100),
-    seasons: num("seasons"), elecPrice: num("elecPrice"), pumpPrice: num("pumpPrice")*1e6,
+    rounds: num("irrDays")/Math.max(0.5, num("maxDays") || 1), elecPrice: num("elecPrice"), pumpPrice: num("pumpPrice")*1e6,
     hoursPerDay: Math.max(1, num("hoursPerDay")), maxDays: num("maxDays") || Infinity,
     sourceQ: src === "" || !(parseFloat(src) > 0) ? Infinity : parseFloat(src), years: Math.max(1, num("years"))};
 }
@@ -1141,6 +1271,48 @@ function turnOptions(U, Klist, manual){
   SEL.want = null;
 }
 
+const fmtD = x => fmt(x, x % 1 ? 1 : 0);
+const warnList = arr => arr.length ? `<div class="note">${arr.map(esc).join("<br>")}</div>` : "";
+function waterCard(Z){
+  const W = Z.W;
+  if (!W.crop) return `<div class="seg"><div class="seg-head"><h3>Nước tưới (tự nhập)</h3></div>
+    <div class="meta">${fmt0(W.perEvent)} lít/gốc/lần ≈ ${fmt(W.daily,1)} lít/gốc/ngày với chu kỳ ${fmtD(W.cycle)} ngày · mỗi lần tưới khu mất ${fmt(Z.T,1)} giờ.</div>${warnList(W.warn)}</div>`;
+  const c = W.crop;
+  return `<div class="seg"><div class="seg-head"><h3>Nhu cầu nước: ${c.name}</h3>${W.warn.length ? '<span class="badge b-warn">Cần xem lại</span>' : '<span class="badge b-ok">Đủ nước</span>'}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${fmt0(W.gross)} lít</div><div class="l">mỗi cây mỗi ngày lúc cao điểm mùa khô (${fmt(W.gross/W.A,1)} mm/ngày)</div></div>
+      <div class="kpi"><div class="v">${fmt0(W.perEvent)} lít</div><div class="l">mỗi cây mỗi lần tưới (${W.auto ? 'chu kỳ ' + fmtD(W.cycle) + ' ngày' : 'tự nhập, nhu cầu ' + fmt0(W.need) + ' lít'})</div></div>
+      <div class="kpi"><div class="v">${fmt(Z.T,1)} giờ</div><div class="l">mỗi lần tưới khu (${Z.e} đầu × ${fmt(Z.qe,1)} lít/giờ mỗi cây)</div></div>
+      <div class="kpi"><div class="v">${fmt0(W.gross*Z.zoneTrees/1000)} m³</div><div class="l">nước cho cả khu mỗi ngày (${fmt0(W.gross*1e4/W.A/1000)} m³/ha/ngày)</div></div>
+    </div>
+    <p class="meta">Cách tính: ETo ${fmt(W.ETo,1)} mm/ngày × Kc ${fmt(W.Kc,2)} × Kr ${fmt(W.Kr,2)} (tán ${fmt(W.d,1)} m che ${fmt0(W.Gc*100)}% diện tích) × ${fmt(W.A,1)} m²/cây ÷ hiệu suất tưới ${fmt0(W.Ea*100)}% × mức tưới ${fmt0(W.level*100)}% = <b>${fmt0(W.gross)} lít/cây/ngày</b>.</p>
+    <p class="meta">${W.soil.name}, rễ hút nước sâu khoảng ${fmt(W.Zr,1)} m, đầu tưới làm ướt ${fmt0(W.Pw*100)}% diện tích: đất giữ đủ ẩm tối đa khoảng <b>${fmt(Math.min(W.Imax, 99),1)} ngày</b> giữa 2 lần tưới.</p>
+    <p class="help">${c.note}</p>
+    ${warnList(W.warn)}
+  </div>`;
+}
+
+/* reference table: every crop at its usual spacing, mature canopy and suggested emitters */
+function cropTable(){
+  const soil = SOILS[$("soil").value] || SOILS.bazan, cycle = Math.max(0.5, num("maxDays") || 1);
+  const rows = Object.entries(CROPS).map(([id, c]) => {
+    const W = waterNeed({...ZDEF, ...cropFields(id)}, c.sys.ePerTree, c.sys.qe, c.rowSp, c.treeSp);
+    return `<tr class="main">
+      <td><b>${c.name}</b></td><td>${fmt(c.Kc,2)}</td><td>${fmt(c.rowSp,1)} × ${fmt(c.treeSp,1)}</td><td>${fmt(c.canopy,1)}</td>
+      <td><b>${fmt0(W.gross)}</b></td><td>${fmt0(W.need)}</td><td>${fmt0(W.gross*1e4/W.A/1000)}</td>
+      <td>${c.sys.type === 'bec' ? 'Béc' : 'Nhỏ giọt'} ${c.sys.ePerTree} × ${fmt(c.sys.qe,0)} L/h</td><td>${fmt(Math.min(W.Imax, 99),1)}</td>
+      <td><button class="linkbtn" data-usecrop="${id}">Dùng</button></td></tr>
+      <tr class="sub"><td colspan="10"><div class="stick">${c.note}</div></td></tr>`;
+  }).join("");
+  return `<div class="seg"><details id="cropDet" ${SEL.cropOpen ? 'open' : ''} style="margin-top:0">
+    <summary>Bảng tra nhu cầu nước ${Object.keys(CROPS).length} loại cây phổ biến (ETo ${fmt(num("eto"),1)} mm/ngày, ${soil.name}, chu kỳ ${fmtD(cycle)} ngày)</summary>
+    <p class="help">Cây trưởng thành, lúc cao điểm mùa khô, khoảng cách và đường kính tán điển hình; mức tưới ${fmt0(num("level"))}%. Số liệu tham khảo: Kc theo FAO-56 và nghiên cứu ở Việt Nam, nên hiệu chỉnh theo khuyến cáo khuyến nông địa phương. Bấm “Dùng” để áp cây đó cho khu đang sửa.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Cây trồng</th><th>Kc</th><th>Hàng × cây (m)</th><th>Tán (m)</th><th>Lít/cây/ngày</th><th>Lít/cây/lần</th><th>m³/ha/ngày</th><th>Đầu tưới gợi ý</th><th>Giữ ẩm tối đa (ngày)</th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+  </details></div>`;
+}
+
 function zoneCards(ctx){
   const z = ZONES[ZSEL], Z = ctx.designs[ZSEL];
   if (!z || !Z) return "";
@@ -1149,6 +1321,7 @@ function zoneCards(ctx){
   const subNote = `<div class="meta">${Z.subMid ? 'Nối ở giữa: 2 phía, mỗi phía' : 'Dài'} ${fmt0(sub.len)} m · địa hình: ${slopeText(sub.halves, sub.s)} · tổn thất cục bộ +${fmt0(num("minor"))}%</div>`;
   return `<h3 style="margin-top:14px">Chi tiết khu: ${esc(z.name)}</h3>
     <p class="meta">${Z.zoneTrees.toLocaleString("vi-VN")} cây · ${(Z.zoneTrees*Z.e).toLocaleString("vi-VN")} đầu tưới · ${fmt(Z.areaHa,2)} ha · ${fmt(Z.zoneQ,1)} m³/h · cần <b>${fmt(Z.Hzone,1)} m</b> tại điểm nối · mỗi lần tưới ${fmt(Z.T,1)} giờ</p>
+    ${waterCard(Z)}
     ${lineCard("Ống tưới (dọc hàng cây)", `Mỗi ${Z.feedMid?'nhánh':'hàng'}: ${Math.max(...lat.halves.map(h=>h.N))} đầu × ${fmt(Z.qe,1)} lít/giờ · áp đầu tưới ${fmt(Z.He,1)} m`, lat, latNote)}
     ${lineCard("Ống nhánh cấp 2 (chạy ngang các hàng)", `Cấp cho ${Z.rows} hàng × ${fmt(lat.Qtot,2)} m³/h`, sub, subNote)}`;
 }
@@ -1158,18 +1331,20 @@ function zoneSummary(ctx, A){
   const turnsOfZone = ZONES.map(() => new Set());
   if (A && A.turnOf) ctx.units.forEach((u, i) => turnsOfZone[u.zi].add(A.turnOf[i] + 1));
   const rows = ZONES.map((z, i) => {
-    const d = ctx.designs[i], c = Math.max(1, Math.round(+z.count || 1));
-    const st = d.ok ? '<span class="badge b-ok">Đạt</span>' : '<span class="badge b-bad">Xem lại</span>';
+    const d = ctx.designs[i], c = Math.max(1, Math.round(+z.count || 1)), W = d.W;
+    const st = d.ok && !W.warn.length ? '<span class="badge b-ok">Đạt</span>' : `<span class="badge ${d.ok ? 'b-warn' : 'b-bad'}">Xem lại</span>`;
     return `<tr class="${i===ZSEL?'sel':''}">
       <td><button class="linkbtn" data-zsel="${i}">${esc(z.name)}</button></td>
+      <td class="l">${W.crop ? W.crop.name : 'Khác'}</td>
       <td>${ptName(clampPoint(z.point, R))}</td><td>${c}</td>
       <td>${(d.zoneTrees*c).toLocaleString("vi-VN")}</td><td>${fmt(d.areaHa*c,2)}</td>
+      <td>${fmt0(W.auto ? W.gross : W.daily)}</td><td>${fmt0(W.perEvent)}${W.auto ? '' : ' (tự nhập)'}</td><td>${fmt(d.T,1)}</td>
       <td>Ø${d.lat.use.od}${d.lat.pick ? '' : ' ⚠'}</td><td>Ø${d.sub.use.od}${d.sub.pick ? '' : ' ⚠'}</td>
-      <td>${fmt(d.zoneQ,1)}</td><td>${fmt(d.Hzone,1)}</td><td>${fmt(d.T,1)}</td>
+      <td>${fmt(d.zoneQ,1)}</td><td>${fmt(d.Hzone,1)}</td>
       <td>${[...turnsOfZone[i]].sort((a,b)=>a-b).join(", ") || '–'}</td><td>${st}</td></tr>`;
   }).join("");
   return `<div class="table-wrap"><table>
-    <thead><tr><th>Khu</th><th>Nối vào</th><th>SL</th><th>Cây</th><th>ha</th><th>Ống tưới</th><th>Ống nhánh</th><th>Q 1 khu (m³/h)</th><th>Áp cần (m)</th><th>Giờ / lần</th><th>Lượt</th><th>Trạng thái</th></tr></thead>
+    <thead><tr><th>Khu</th><th class="l">Cây trồng</th><th>Nối vào</th><th>SL</th><th>Số cây</th><th>ha</th><th>Lít/cây/ngày</th><th>Lít/cây/lần</th><th>Giờ / lần</th><th>Ống tưới</th><th>Ống nhánh</th><th>Q 1 khu (m³/h)</th><th>Áp cần (m)</th><th>Lượt</th><th>Trạng thái</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 
@@ -1179,7 +1354,15 @@ function calcSystem(){
   $("zoneTbl").classList.toggle("manual", manual);
   const trees = ctx.units.reduce((a,u) => a + ctx.designs[u.zi].zoneTrees, 0);
   const area = ctx.units.reduce((a,u) => a + ctx.designs[u.zi].areaHa, 0);
-  const farmLine = `<p class="meta">Toàn vườn: ${U} khu · ${trees.toLocaleString("vi-VN")} cây · ${fmt(area,2)} ha · ${fmt(ctx.units.reduce((a,u)=>a+u.Q,0),1)} m³/h nếu mở tất cả.</p>`;
+  const dailyM3 = ctx.units.reduce((a,u) => { const d = ctx.designs[u.zi]; return a + (d.W.auto ? d.W.gross : d.W.daily)*d.zoneTrees/1000; }, 0);
+  const farmLine = `<p class="meta">Toàn vườn: ${U} khu · ${trees.toLocaleString("vi-VN")} cây · ${fmt(area,2)} ha · nước cao điểm mùa khô khoảng <b>${fmt0(dailyM3)} m³/ngày</b> · ${fmt(ctx.units.reduce((a,u)=>a+u.Q,0),1)} m³/h nếu mở tất cả.</p>`;
+  const Zs = ctx.designs[ZSEL];
+  if (Zs){
+    const W = Zs.W;
+    $("zeWater").innerHTML = W.crop
+      ? `≈ <b>${fmt0(W.gross)} lít/cây/ngày</b> → ${fmt0(W.perEvent)} lít/cây mỗi lần tưới${W.auto ? ` (chu kỳ ${fmtD(W.cycle)} ngày)` : ` (nhu cầu ${fmt0(W.need)} lít)`}, mỗi lần tưới khu mất ${fmt(Zs.T,1)} giờ.${W.warn.length ? ' <span style="color:var(--warn)">⚠ ' + W.warn.length + ' lưu ý, xem phần kết quả.</span>' : ''}`
+      : `Mỗi lần tưới khu mất ${fmt(Zs.T,1)} giờ.`;
+  }
 
   if (U === 0){
     CUR = null; ALTS = null; lastProfile = null;
@@ -1387,9 +1570,12 @@ function calcSystem(){
   const pressNote = A.ok && A.TDHmax > 60
     ? `<div class="note">Cột áp bơm khá cao (${fmt0(A.TDHmax)} m ≈ ${fmt(bar(A.TDHmax),1)} bar). Cân nhắc đặt bơm tăng áp giữa tuyến, chia khu theo độ cao, hoặc giảm tổn thất cho phép để tăng cỡ ống.</div>` : "";
   const badZones = ZONES.filter((z, i) => !ctx.designs[i].ok).map(z => esc(z.name));
-  const zoneWarn = badZones.length ? `<div class="note">Ống trong khu chưa đạt ở: ${badZones.join(", ")}. Xem phần “Các khu tưới” bên dưới.</div>` : "";
+  const waterZones = ZONES.filter((z, i) => ctx.designs[i].W.warn.length).map(z => esc(z.name));
+  const zoneWarn = (badZones.length ? `<div class="note">Ống trong khu chưa đạt ở: ${badZones.join(", ")}. Xem phần “Các khu tưới” bên dưới.</div>` : "")
+    + (waterZones.length ? `<div class="note">Nước tưới cần xem lại ở: ${waterZones.join(", ")} (bấm tên khu trong bảng “Các khu tưới” để xem lý do).</div>` : "");
 
   $("out").innerHTML = `<h2>Kết quả: ${A.label}${best && A.id === best.id ? ' ★' : ''}${A.hard ? ' ⚠' : ''}</h2>${kpis}${pressNote}${zoneWarn}${farmLine}
+    ${cropTable()}
     ${cmpHtml}
     ${detailHtml}
     <div class="seg"><div class="seg-head"><h3>Các khu tưới</h3></div>
@@ -1465,8 +1651,9 @@ function renderZones(){
 function loadZoneToForm(){
   const z = ZONES[ZSEL]; if (!z) return;
   for (const f of ZF) $(f).value = z[f] ?? ZDEF[f];
+  if (!$("crop").value) $("crop").value = "khac";
   $("zeName").textContent = z.name;
-  syncPc();
+  syncPc(); syncWaterMode();
 }
 function formToZone(){
   const z = ZONES[ZSEL]; if (!z) return;
@@ -1563,7 +1750,7 @@ function restore(){
         if (v2) old = {vals: v2.vals, net: (v2.segs || []).map((s, i) => ({from:i, L:s.L, z:s.z, n:s.n})), mode: v2.mode};
       }
       if (old && Array.isArray(old.net) && old.net.length){
-        const basis = {...ZDEF};
+        const basis = {...ZDEF, crop:"khac", waterMode:"manual", canopy:3};
         for (const f of ZF) if (old.vals && f in old.vals) basis[f] = old.vals[f];
         const zs = [];
         old.net.forEach((r, i) => {
@@ -1578,7 +1765,7 @@ function restore(){
     for (const [k,v] of Object.entries(d.vals || {})) if ($(k) && k !== "turns" && !ZF.includes(k)) $(k).value = v;
     if (d.vals && d.vals.turns) SEL.want = d.vals.turns;
     if (Array.isArray(d.net) && d.net.length) NET = d.net.map(r => ({from:+r.from || 0, L:+r.L || 0, z:+r.z || 0}));
-    if (Array.isArray(d.zones) && d.zones.length) ZONES = d.zones.map(z => ({...ZDEF, count:1, turn:1, ...z}));
+    if (Array.isArray(d.zones) && d.zones.length) ZONES = d.zones.map(z => ({...ZDEF, count:1, turn:1, ...(z.crop ? {} : {crop:"khac", waterMode:"manual", canopy:3}), ...z}));
     if (d.zsel != null) ZSEL = Math.min(Math.max(0, +d.zsel || 0), ZONES.length - 1);
     if (d.mode) mode = d.mode;
   } catch(e) {}
@@ -1590,19 +1777,36 @@ function recalc(){
 }
 let tmr; function schedule(){ clearTimeout(tmr); tmr = setTimeout(recalc, 150); }
 
-function applyPreset(p){
-  for (const [k,v] of Object.entries(p)) if ($(k)) $(k).value = v;
-  syncPc(); formToZone(); recalc();
+function applyCrop(id){
+  $("crop").value = CROPS[id] ? id : "khac";
+  if (CROPS[id]) for (const [k,v] of Object.entries(cropFields(id))) if ($(k)) $(k).value = v;
+  syncPc(); syncWaterMode(); formToZone(); recalc();
+}
+function syncWaterMode(){
+  const known = !!CROPS[$("crop").value];
+  if (!known) $("waterMode").value = "manual";
+  $("waterMode").disabled = !known;
+  $("lptWrap").classList.toggle("hidden", known && $("waterMode").value === "auto");
+}
+function fillStatic(){
+  $("crop").innerHTML = Object.entries(CROPS).map(([id, c]) => `<option value="${id}">${c.name}</option>`).join("") + `<option value="khac">Cây khác (tự nhập lượng nước)</option>`;
+  $("region").innerHTML = REGIONS.map(r => `<option value="${r.id}">${r.name}${r.eto ? ' · ' + fmt(r.eto,1) + ' mm/ngày' : ''}</option>`).join("");
+  $("soil").innerHTML = Object.entries(SOILS).map(([id, x]) => `<option value="${id}">${x.name}</option>`).join("");
+  $("region").value = "taynguyen"; $("soil").value = "bazan";
 }
 
 fillMatSelect($("matLat"), "ldpe");
 fillMatSelect($("matSub"), "pvc");
 fillMatSelect($("matMain"), "pvc");
 fillMatSelect($("oMat"), "pvc");
+fillStatic();
 restore();
 renderNet(); renderZones(); loadZoneToForm();
 
-document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(PRESETS[b.dataset.preset])));
+$("crop").addEventListener("change", () => applyCrop($("crop").value));
+$("waterMode").addEventListener("change", () => { syncWaterMode(); formToZone(); schedule(); });
+$("region").addEventListener("change", () => { const r = REGIONS.find(x => x.id === $("region").value); if (r && r.eto) $("eto").value = r.eto; schedule(); });
+$("eto").addEventListener("input", () => { const r = REGIONS.find(x => x.id === $("region").value); if (r && r.eto && Math.abs(r.eto - num("eto")) > 1e-9) $("region").value = "custom"; });
 fields().forEach(el => el.addEventListener("input", () => { if (ZF.includes(el.id)) formToZone(); schedule(); }));
 
 $("type").addEventListener("change", () => {
@@ -1628,10 +1832,13 @@ $("oQmode").addEventListener("change", () => { syncQmode(); schedule(); });
 $("out").addEventListener("click", e => {
   const z = e.target.closest("[data-zsel]");
   if (z){ selectZone(+z.dataset.zsel); return; }
+  const uc = e.target.closest("[data-usecrop]");
+  if (uc){ applyCrop(uc.dataset.usecrop); return; }
   const b = e.target.closest("button[data-k], tr.cmp-row[data-k]");
   if (b) selectPlan(b.dataset.k);
 });
 $("out").addEventListener("toggle", e => {
+  if (e.target.id === "cropDet"){ SEL.cropOpen = e.target.open; return; }
   if (e.target.id !== "jDet") return;
   const was = !!SEL.jOpen; SEL.jOpen = e.target.open;
   if (SEL.jOpen && !was) recalc();
