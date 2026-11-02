@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tính Ống Tưới</title>
-<meta name="description" content="Tính phi ống tưới nhỏ giọt và tưới béc theo địa hình; mạng ống chính nhiều nhánh tối ưu nhỏ dần; so sánh phương án bơm lớn tưới 1 lượt với bơm nhỏ tưới nhiều lượt.">
+<meta name="description" content="Tính phi ống tưới nhỏ giọt và tưới béc cho vườn nhiều khu khác nhau; mạng ống chính nhiều nhánh tối ưu nhỏ dần; so sánh phương án bơm lớn tưới 1 lượt với bơm nhỏ tưới nhiều lượt.">
 <style>
 :root{
   --bg:#f6f7f4; --card:#ffffff; --ink:#1d2a1f; --muted:#5d6b60; --line:#dde3dc;
@@ -31,7 +31,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-app
 header{padding:20px 16px 8px;max-width:1180px;margin:0 auto}
 h1{font-size:1.45rem;margin:0 0 4px}
 header p{margin:0;color:var(--muted)}
-main{max-width:1180px;margin:0 auto;padding:8px 16px 40px;display:grid;gap:16px;grid-template-columns:minmax(0,430px) minmax(0,1fr);align-items:start}
+main{max-width:1180px;margin:0 auto;padding:8px 16px 40px;display:grid;gap:16px;grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}
 @media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
 .card h2{font-size:1.05rem;margin:0 0 10px}
@@ -45,11 +45,13 @@ label.full{grid-column:1/-1}
 label small{display:block;font-size:.75rem;opacity:.85}
 input,select{width:100%;margin-top:2px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:var(--input);color:var(--ink);font:inherit}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:0}
-.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .presets button,.btn{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer}
-.btn-x{border:none;background:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:6px}
-.btn-x:hover{color:var(--bad);background:var(--bad-soft)}
-.linkbtn{border:none;background:none;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.btn-x{border:none;background:none;color:var(--muted);font-size:1.05rem;cursor:pointer;padding:2px 5px;border-radius:6px}
+.btn-x:hover:not(:disabled){color:var(--ink);background:var(--accent-soft)}
+.btn-x.del:hover:not(:disabled){color:var(--bad);background:var(--bad-soft)}
+.btn-x:disabled{opacity:.35;cursor:default}
+.linkbtn{border:none;background:none;padding:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-align:left}
 details{margin-top:12px}
 summary{cursor:pointer;color:var(--accent);font-weight:600}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:6px}
@@ -73,14 +75,23 @@ th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white
 th{color:var(--muted);font-weight:600}
 th:first-child,td:first-child{text-align:left}
 td.wrap,th.wrap{white-space:normal;text-align:left;min-width:200px}
+td.l,th.l{text-align:left}
 tr.pick td{background:var(--accent-soft);font-weight:700}
 tr.sel td{background:var(--accent-soft)}
 tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .segtbl th,.segtbl td{padding:3px 4px;text-align:left}
 .segtbl th{white-space:normal;font-size:.8rem;vertical-align:bottom}
 .segtbl input,.segtbl select{min-width:56px;margin:0}
-.segtbl select{min-width:72px;padding:7px 4px}
+.segtbl select{min-width:68px;padding:7px 4px}
 .segtbl td.pt{font-weight:700;color:var(--ink)}
+.segtbl td.zl{font-size:.78rem;color:var(--muted);white-space:normal;min-width:70px;max-width:120px}
+.segtbl input[type=text]{min-width:110px}
+.segtbl input{padding:7px 5px}
+@media (max-width:480px){ .segtbl .zl{display:none} }
+#zoneTbl:not(.manual) .manual-only{display:none}
+.zedit{border:2px solid var(--accent);border-radius:12px;padding:10px 12px;margin-top:14px}
+.zedit-h{font-weight:700;font-size:.95rem}
+.zedit h3{margin-top:12px}
 .rowblk{padding:6px 10px;border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:6px;margin-top:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .chip{display:inline-flex;gap:6px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:.85rem}
@@ -119,7 +130,7 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
 <body>
 <header>
   <h1>Tính ống tưới nhỏ giọt &amp; tưới béc</h1>
-  <p>Chọn phi (Ø) ống theo lưu lượng, vận tốc, tổn thất và chênh cao; mạng ống nhiều nhánh tối ưu <b>to trước – nhỏ dần</b>; so sánh <b>bơm lớn tưới 1 lượt</b> với <b>bơm nhỏ tưới nhiều lượt</b>.</p>
+  <p>Vườn nhiều khu khác nhau, mạng ống nhiều nhánh, ống chính tối ưu <b>to trước – nhỏ dần</b>, so sánh <b>bơm lớn tưới 1 lượt</b> với <b>bơm nhỏ tưới nhiều lượt</b>.</p>
 </header>
 
 <main>
@@ -131,97 +142,120 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
 
   <!-- ========== SYSTEM MODE ========== -->
   <div id="form-sys">
-    <div class="presets" aria-label="Mẫu có sẵn">
-      <button data-preset="cafe_drip">Cà phê – nhỏ giọt</button>
-      <button data-preset="cafe_bec">Cà phê – béc gốc</button>
-      <button data-preset="tieu_drip">Tiêu – nhỏ giọt</button>
-      <button data-preset="saurieng_bec">Sầu riêng – béc</button>
-    </div>
-
-    <h3>Kiểu tưới &amp; đầu tưới</h3>
-    <div class="grid2">
-      <label class="full">Kiểu tưới
-        <select id="type">
-          <option value="drip">Nhỏ giọt</option>
-          <option value="bec">Béc (phun mưa gốc / mini sprinkler)</option>
-        </select>
-      </label>
-      <label>Số đầu tưới / cây
-        <input id="ePerTree" type="number" min="1" step="1" value="2">
-      </label>
-      <label>Lưu lượng 1 đầu (lít/giờ)
-        <input id="qe" type="number" min="0.5" step="0.5" value="8">
-      </label>
-      <label>Áp làm việc đầu tưới (m cột nước)
-        <input id="He" type="number" min="1" step="1" value="10">
-      </label>
-      <label>Đầu tưới bù áp?
-        <select id="pc">
-          <option value="0">Không</option>
-          <option value="1">Có (bù áp)</option>
-        </select>
-      </label>
-      <label id="pcMaxWrap" class="full hidden">Áp tối đa đầu bù áp còn ổn định (m)
-        <input id="HmaxPC" type="number" min="5" step="1" value="30">
-        <small>Xem thông số nhà sản xuất, thường 25–40 m (2,5–4 bar). Áp làm việc ở trên là áp tối thiểu.</small>
-      </label>
-    </div>
-
-    <h3>Một khu tưới (bố trí &amp; độ dốc)</h3>
-    <div class="grid2">
-      <label>Khoảng cách hàng (m)
-        <input id="rowSp" type="number" min="0.5" step="0.1" value="3">
-      </label>
-      <label>Khoảng cách cây (m)
-        <input id="treeSp" type="number" min="0.3" step="0.1" value="3">
-      </label>
-      <label>Số cây / hàng
-        <input id="treesPerRow" type="number" min="1" step="1" value="40">
-      </label>
-      <label>Số hàng / khu
-        <input id="rows" type="number" min="1" step="1" value="25">
-      </label>
-      <label>Ống nhánh cấp vào hàng
-        <select id="feed">
-          <option value="end">Ở đầu hàng</option>
-          <option value="mid" selected>Ở giữa hàng (chia 2 phía)</option>
-        </select>
-      </label>
-      <label>Ống chính nối vào ống nhánh
-        <select id="subFeed">
-          <option value="end">Ở đầu ống nhánh</option>
-          <option value="mid">Ở giữa ống nhánh</option>
-        </select>
-      </label>
-      <label>Độ dốc dọc hàng (%)
-        <input id="slopeRow" type="number" step="0.5" value="0">
-        <small>+ lên dốc, − xuống dốc theo chiều nước chảy vào hàng</small>
-      </label>
-      <label>Độ dốc dọc ống nhánh (%)
-        <input id="slopeSub" type="number" step="0.5" value="0">
-        <small>+ lên dốc, − xuống dốc theo chiều nước chảy (5% = 5 m/100 m)</small>
-      </label>
-    </div>
-
-    <h3>Mạng ống chính &amp; các nhánh</h3>
+    <h3 style="margin-top:4px">1. Mạng ống chính &amp; các nhánh</h3>
     <div class="table-wrap">
       <table class="segtbl" aria-label="Các đoạn ống chính và nhánh">
-        <thead><tr><th>Điểm cuối</th><th>Đi từ</th><th>Dài (m)</th><th>Cao độ cuối (m)</th><th>Số khu ở cuối</th><th></th></tr></thead>
+        <thead><tr><th>Điểm</th><th>Đi từ</th><th>Dài (m)</th><th>Cao độ (m)</th><th class="zl">Khu nối vào</th><th></th></tr></thead>
         <tbody id="netBody"></tbody>
       </table>
     </div>
     <div style="margin-top:6px"><button class="btn" id="addRow" type="button">+ Thêm đoạn</button></div>
-    <p class="help">Mỗi đoạn ống đi từ <b>Bơm</b> hoặc một điểm đã có tới một điểm mới (Đ1, Đ2…). Muốn <b>rẽ nhánh</b>, cho nhiều đoạn cùng đi từ một điểm. Cao độ tính so với bơm (bơm = 0): cao hơn ghi số dương, thấp hơn ghi số âm. Số khu là số khu tưới nối vào cuối đoạn; đoạn chỉ dẫn nước ghi 0; khu nhỏ bằng nửa khu chuẩn ghi 0,5.</p>
+    <p class="help">Mỗi đoạn ống đi từ <b>Bơm</b> hoặc một điểm đã có tới một điểm mới (Đ1, Đ2…). Muốn <b>rẽ nhánh</b>, cho nhiều đoạn cùng đi từ một điểm. Cao độ tính so với bơm (bơm = 0): cao hơn ghi số dương, thấp hơn ghi số âm.</p>
 
-    <h3>Phương án vận hành</h3>
+    <h3>2. Các khu tưới</h3>
+    <div class="table-wrap">
+      <table class="segtbl" id="zoneTbl" aria-label="Danh sách khu tưới">
+        <thead><tr><th>Tên khu</th><th>Nối vào</th><th title="Số khu giống hệt nhau">SL</th><th class="manual-only">Lượt</th><th></th></tr></thead>
+        <tbody id="zoneBody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:6px"><button class="btn" id="addZone" type="button">+ Thêm khu</button></div>
+    <p class="help">Mỗi khu có cây trồng, đầu tưới, số cây, độ dốc, lượng nước riêng. Bấm <b>✎</b> để sửa chi tiết khu ở khung bên dưới, <b>⧉</b> để nhân bản khu. <b>SL</b> là số khu giống hệt nhau nối cùng một điểm.</p>
+
+    <div class="zedit" aria-label="Sửa chi tiết khu">
+      <div class="zedit-h">✎ Đang sửa: <span id="zeName"></span></div>
+      <div class="presets" aria-label="Mẫu cây trồng">
+        <button data-preset="cafe_drip">Cà phê – nhỏ giọt</button>
+        <button data-preset="cafe_bec">Cà phê – béc gốc</button>
+        <button data-preset="tieu_drip">Tiêu – nhỏ giọt</button>
+        <button data-preset="saurieng_bec">Sầu riêng – béc</button>
+      </div>
+
+      <h3>Kiểu tưới &amp; đầu tưới</h3>
+      <div class="grid2">
+        <label class="full">Kiểu tưới
+          <select id="type">
+            <option value="drip">Nhỏ giọt</option>
+            <option value="bec">Béc (phun mưa gốc / mini sprinkler)</option>
+          </select>
+        </label>
+        <label>Số đầu tưới / cây
+          <input id="ePerTree" type="number" min="1" step="1">
+        </label>
+        <label>Lưu lượng 1 đầu (lít/giờ)
+          <input id="qe" type="number" min="0.5" step="0.5">
+        </label>
+        <label>Áp làm việc đầu tưới (m cột nước)
+          <input id="He" type="number" min="1" step="1">
+        </label>
+        <label>Đầu tưới bù áp?
+          <select id="pc">
+            <option value="0">Không</option>
+            <option value="1">Có (bù áp)</option>
+          </select>
+        </label>
+        <label id="pcMaxWrap" class="full hidden">Áp tối đa đầu bù áp còn ổn định (m)
+          <input id="HmaxPC" type="number" min="5" step="1">
+          <small>Xem thông số nhà sản xuất, thường 25–40 m (2,5–4 bar). Áp làm việc ở trên là áp tối thiểu.</small>
+        </label>
+        <label class="full">Lượng nước / gốc / lần tưới (lít)
+          <input id="litersPerTree" type="number" min="0" step="5">
+        </label>
+      </div>
+
+      <h3>Bố trí &amp; độ dốc</h3>
+      <div class="grid2">
+        <label>Khoảng cách hàng (m)
+          <input id="rowSp" type="number" min="0.5" step="0.1">
+        </label>
+        <label>Khoảng cách cây (m)
+          <input id="treeSp" type="number" min="0.3" step="0.1">
+        </label>
+        <label>Số cây / hàng
+          <input id="treesPerRow" type="number" min="1" step="1">
+        </label>
+        <label>Số hàng trong khu
+          <input id="rows" type="number" min="1" step="1">
+        </label>
+        <label>Ống nhánh cấp vào hàng
+          <select id="feed">
+            <option value="end">Ở đầu hàng</option>
+            <option value="mid">Ở giữa hàng (chia 2 phía)</option>
+          </select>
+        </label>
+        <label>Ống chính nối vào ống nhánh
+          <select id="subFeed">
+            <option value="end">Ở đầu ống nhánh</option>
+            <option value="mid">Ở giữa ống nhánh</option>
+          </select>
+        </label>
+        <label>Độ dốc dọc hàng (%)
+          <input id="slopeRow" type="number" step="0.5">
+          <small>+ lên dốc, − xuống dốc theo chiều nước chảy vào hàng</small>
+        </label>
+        <label>Độ dốc dọc ống nhánh (%)
+          <input id="slopeSub" type="number" step="0.5">
+          <small>+ lên dốc, − xuống dốc theo chiều nước chảy (5% = 5 m/100 m)</small>
+        </label>
+        <label>Ống tưới (dọc hàng)
+          <select id="matLat"></select>
+        </label>
+        <label>Ống nhánh cấp 2
+          <select id="matSub"></select>
+        </label>
+      </div>
+    </div>
+
+    <h3>3. Phương án vận hành</h3>
     <div class="grid2">
-      <label class="full">Số lượt tưới (phương án đang xem chi tiết)
+      <label class="full">Phương án xem chi tiết
         <select id="turns"><option value="auto">★ Tự chọn phương án kinh tế nhất</option></select>
       </label>
       <label class="full">Chia khu vào các lượt
         <select id="assign">
-          <option value="spread">Rải đều các nhánh (ống nhỏ nhất)</option>
-          <option value="cluster">Theo cụm khu liền nhau (dễ vận hành)</option>
+          <option value="spread">Tự động: rải đều các nhánh (ống nhỏ nhất)</option>
+          <option value="cluster">Tự động: theo cụm khu liền nhau</option>
+          <option value="manual">Tự xếp lượt cho từng khu (cột “Lượt”)</option>
         </select>
       </label>
       <label>Nguồn nước cấp tối đa (m³/giờ)
@@ -234,12 +268,12 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
       <label>Phải tưới xong 1 vòng trong (ngày)
         <input id="maxDays" type="number" min="0.5" step="0.5" value="3">
       </label>
-      <label>Lượng nước / gốc / lần tưới (lít)
-        <input id="litersPerTree" type="number" min="0" step="5" value="40">
+      <label>Số lần tưới / năm
+        <input id="seasons" type="number" min="0" step="1" value="12">
       </label>
     </div>
 
-    <h3>Bơm &amp; chi phí</h3>
+    <h3>4. Bơm &amp; chi phí</h3>
     <div class="grid2">
       <label>Độ sâu hút: mặt nước → bơm (m)
         <input id="suction" type="number" min="0" step="0.5" value="4">
@@ -253,26 +287,13 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
       <label>Giá bơm + tủ điện (triệu đ / HP)
         <input id="pumpPrice" type="number" min="0" step="0.5" value="2.5">
       </label>
-      <label>Số lần tưới / năm
-        <input id="seasons" type="number" min="0" step="1" value="12">
-      </label>
       <label>Giá điện (đ/kWh)
         <input id="elecPrice" type="number" min="0" step="100" value="2500">
       </label>
       <label>Số năm để so sánh
         <input id="years" type="number" min="1" max="30" step="1" value="10">
       </label>
-    </div>
-
-    <h3>Vật liệu &amp; giá ống</h3>
-    <div class="grid2">
-      <label>Ống tưới (dọc hàng)
-        <select id="matLat"></select>
-      </label>
-      <label>Ống nhánh (cấp 2)
-        <select id="matSub"></select>
-      </label>
-      <label>Ống chính &amp; nhánh lớn
+      <label class="full">Ống chính &amp; nhánh
         <select id="matMain"></select>
       </label>
       <label>Giá ống PVC (đ/kg)
@@ -366,12 +387,14 @@ footer{max-width:1180px;margin:0 auto;padding:0 16px 30px;color:var(--muted);fon
   <div class="card" style="margin-top:16px">
     <h2>Cách tính</h2>
     <ul class="help">
-      <li><b>Lưu lượng</b> mỗi đoạn = tổng lưu lượng các khu phía sau đoạn đó <b>đang mở trong cùng một lượt</b>. Ống được chọn theo lượt có lưu lượng lớn nhất qua đoạn đó.</li>
-      <li><b>Tổn thất áp</b> theo Hazen–Williams: h = 10,67·L·Q<sup>1,852</sup> / (C<sup>1,852</sup>·D<sup>4,87</sup>). Ống tưới và ống nhánh được tính <b>từng đầu tưới một</b>: lưu lượng giảm dần, cộng/trừ chênh cao theo độ dốc.</li>
+      <li><b>Mỗi khu</b> được thiết kế riêng: ống tưới và ống nhánh cấp 2 tính <b>từng đầu tưới một</b> (lưu lượng giảm dần, cộng/trừ chênh cao theo độ dốc), cho ra lưu lượng khu, áp cần tại điểm nối và thời gian tưới (= lượng nước/gốc ÷ lưu lượng mỗi gốc).</li>
+      <li><b>Tổn thất áp</b> theo Hazen–Williams: h = 10,67·L·Q<sup>1,852</sup> / (C<sup>1,852</sup>·D<sup>4,87</sup>).</li>
+      <li><b>Lưu lượng</b> mỗi đoạn ống chính = tổng lưu lượng các khu phía sau đoạn đó <b>đang mở trong cùng một lượt</b>. Ống được chọn theo lượt có lưu lượng lớn nhất qua đoạn.</li>
       <li><b>Mạng ống chính &amp; nhánh</b>: mỗi đoạn được chia nhỏ. Ứng dụng duyệt mọi cách phối cỡ ống (nhánh không to hơn ống phía trước) và chọn cách <b>rẻ nhất</b> thỏa các điều kiện: vận tốc ≤ giới hạn; khu nào cũng đủ áp; mọi điểm trên tuyến (kể cả đỉnh đồi) còn ≥ áp tối thiểu; cột áp bơm không vượt mức cần cho điểm khó nhất cộng phần tổn thất cho phép.</li>
-      <li><b>Chia lượt</b>: “Rải đều các nhánh” lấy khu lần lượt theo từng nhánh nên mỗi nhánh chỉ mang ít khu nhất có thể trong một lượt, ống nhỏ nhất. “Theo cụm” tưới hết khu này tới khu khác, dễ vận hành nhưng ống nhánh to hơn.</li>
-      <li><b>So sánh phương án</b>: với mỗi số lượt, ứng dụng tính lại ống, bơm (theo lượt nặng nhất) và điện năng từng lượt. Tổng chi phí = tiền ống chính &amp; nhánh + tiền bơm + tiền điện trong số năm đã chọn. Ống trong khu giống nhau ở mọi phương án nên không tính vào.</li>
-      <li><b>Bơm</b>: H = độ sâu hút + lọc/châm phân + cột áp tại cửa bơm; P = 9,81·Q·H / η. Áp lớn nhất trong ống ước tính khi đóng van (≈ 1,2 lần cột áp bơm) để chọn cấp áp PN theo từng đoạn.</li>
+      <li><b>Chia lượt tự động</b>: “Rải đều các nhánh” xếp khu theo thứ tự từng nhánh, mỗi khu vào lượt đang nhẹ nhất, nên lưu lượng các lượt cân bằng và ống nhỏ. “Theo cụm” tưới hết các khu liền nhau rồi mới sang cụm khác. Có thể <b>tự xếp lượt</b> cho từng khu và so sánh với các phương án tự động.</li>
+      <li><b>Thời gian</b>: mỗi lượt kéo dài bằng khu tưới lâu nhất trong lượt. Điện năng mỗi lượt = 9,81 × thể tích nước × cột áp ÷ (3600 × hiệu suất bơm × hiệu suất động cơ 0,85).</li>
+      <li><b>So sánh phương án</b>: tổng chi phí = tiền ống chính &amp; nhánh + tiền bơm (theo lượt nặng nhất) + tiền điện trong số năm đã chọn. Ống trong khu giống nhau ở mọi phương án nên không tính vào.</li>
+      <li><b>Bơm</b>: H = độ sâu hút + lọc/châm phân + cột áp tại cửa bơm; P = 9,81·Q·H / η. Áp lớn nhất khi đóng van ≈ 1,2 lần cột áp bơm, dùng để chọn cấp áp PN theo từng đoạn.</li>
       <li>Kích thước thành ống là giá trị điển hình. Đối chiếu catalogue nhà sản xuất (Bình Minh, Tiền Phong, Đạt Hòa…).</li>
     </ul>
   </div>
@@ -393,35 +416,50 @@ const MAT_KEYS = Object.keys(CATALOG);
 const PN_LIST = [4,5,6,8,10,12.5,16];
 const STD_HP = [0.5,1,1.5,2,3,4,5,5.5,7.5,10,15,20,25,30,40,50,60,75,100,125,150];
 
+/* ---- zones: every zone carries its own parameters ---- */
+const ZF = ["type","ePerTree","qe","He","pc","HmaxPC","rowSp","treeSp","treesPerRow","rows","feed","subFeed","slopeRow","slopeSub","matLat","matSub","litersPerTree"];
+const ZDEF = {type:"drip", ePerTree:2, qe:8, He:10, pc:"0", HmaxPC:30, rowSp:3, treeSp:3, treesPerRow:40, rows:25,
+              feed:"mid", subFeed:"end", slopeRow:0, slopeSub:0, matLat:"ldpe", matSub:"pvc", litersPerTree:40};
+/* crop presets change the crop / emitter / spacing / water, never the size of the zone */
 const PRESETS = {
-  cafe_drip:   {type:"drip", ePerTree:2, qe:8,  He:10, pc:"0", rowSp:3,   treeSp:3,   treesPerRow:40, rows:25, feed:"mid", subFeed:"end", litersPerTree:40,  matLat:"ldpe", matSub:"pvc", matMain:"pvc"},
-  cafe_bec:    {type:"bec",  ePerTree:1, qe:90, He:20, pc:"0", rowSp:3,   treeSp:3,   treesPerRow:40, rows:8,  feed:"mid", subFeed:"end", litersPerTree:250, matLat:"hdpe", matSub:"pvc", matMain:"pvc"},
-  tieu_drip:   {type:"drip", ePerTree:2, qe:4,  He:10, pc:"1", rowSp:2.5, treeSp:2.5, treesPerRow:60, rows:40, feed:"mid", subFeed:"end", litersPerTree:20,  matLat:"ldpe", matSub:"pvc", matMain:"pvc"},
-  saurieng_bec:{type:"bec",  ePerTree:2, qe:120,He:20, pc:"0", rowSp:8,   treeSp:8,   treesPerRow:20, rows:5,  feed:"end", subFeed:"end", litersPerTree:300, matLat:"hdpe", matSub:"pvc", matMain:"pvc"}
+  cafe_drip:   {type:"drip", ePerTree:2, qe:8,  He:10, pc:"0", rowSp:3,   treeSp:3,   feed:"mid", litersPerTree:40,  matLat:"ldpe", matSub:"pvc"},
+  cafe_bec:    {type:"bec",  ePerTree:1, qe:90, He:20, pc:"0", rowSp:3,   treeSp:3,   feed:"mid", litersPerTree:250, matLat:"hdpe", matSub:"pvc"},
+  tieu_drip:   {type:"drip", ePerTree:2, qe:4,  He:10, pc:"1", rowSp:2.5, treeSp:2.5, feed:"mid", litersPerTree:20,  matLat:"ldpe", matSub:"pvc"},
+  saurieng_bec:{type:"bec",  ePerTree:2, qe:120,He:20, pc:"0", rowSp:8,   treeSp:8,   feed:"end", litersPerTree:300, matLat:"hdpe", matSub:"pvc"}
 };
+const mkZone = (name, point, preset, extra) => ({...ZDEF, ...PRESETS[preset], name, point, count:1, turn:1, ...extra});
 
 /* Network: each row is a pipe from point `from` (0 = pump) to a new point (row index + 1) */
 let NET = [
-  {from:0, L:150, z:4,  n:0},
-  {from:1, L:200, z:14, n:2},
-  {from:2, L:150, z:8,  n:2},
-  {from:1, L:220, z:-3, n:2}
+  {from:0, L:150, z:4},
+  {from:1, L:200, z:14},
+  {from:2, L:150, z:8},
+  {from:1, L:220, z:-3}
 ];
-const SEL = {want:null, path:null, turn:null, jOpen:false};
-let CUR = null;          // detailed result of the alternative being viewed
-let ALTS = null;         // all alternatives (for the comparison chart)
+let ZONES = [
+  mkZone("Cà phê A", 2, "cafe_drip", {treesPerRow:40, rows:25, turn:1}),
+  mkZone("Cà phê B", 3, "cafe_drip", {treesPerRow:36, rows:22, slopeSub:-1, turn:2}),
+  mkZone("Cà phê C", 2, "cafe_drip", {treesPerRow:30, rows:30, turn:2}),
+  mkZone("Sầu riêng", 4, "saurieng_bec", {treesPerRow:20, rows:5, turn:1}),
+  mkZone("Tiêu", 4, "tieu_drip", {treesPerRow:60, rows:20, turn:3})
+];
+let ZSEL = 0;            // zone being edited
+const SEL = {want:null, path:null, turn:null, key:null, jOpen:false};
+let CUR = null;          // detailed result of the plan being viewed
+let ALTS = null;         // all plans (comparison chart)
 
 /* ================== Helpers ================== */
 const $ = id => document.getElementById(id);
 const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
 const fmt = (x, d=1) => isFinite(x) ? x.toLocaleString("vi-VN",{minimumFractionDigits:d,maximumFractionDigits:d}) : "–";
 const fmt0 = x => fmt(x,0);
-const fmtN = x => fmt(x, Math.abs(x % 1) > 1e-9 ? 1 : 0);
 const money = x => !isFinite(x) ? "–" : (Math.abs(x) >= 1e9 ? fmt(x/1e9,2) + " tỷ đ" : Math.abs(x) >= 1e6 ? fmt(x/1e6,1) + " triệu đ" : fmt0(Math.round(x/1000)*1000) + " đ");
 const moneyShort = x => !isFinite(x) ? "–" : (x >= 1e9 ? fmt(x/1e9,2) + " tỷ" : fmt(x/1e6, x >= 1e7 ? 0 : 1) + " tr");
 const bar = m => m/10.2;
 const pnFor = mHead => PN_LIST.find(p => p >= bar(mHead)) || "> 16";
 const ptName = v => v === 0 ? "Bơm" : "Đ" + v;
+const hp = h => fmt(h, h % 1 ? 1 : 0);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 function fillMatSelect(sel, def){
   sel.innerHTML = MAT_KEYS.map(k=>`<option value="${k}">${CATALOG[k].name}</option>`).join("");
@@ -479,67 +517,109 @@ function designLine({halves, qOut, s, mat, vmax, allow, Hreq, minorPct=0}){
   return {rows, pick, use, Qin, Qtot, mat, allow, Hreq, halves, s, len: Nmax*s, dzMax, split, showVar:true};
 }
 
-/* ================== Zone design ================== */
-function designZone(){
-  const e = Math.max(1, Math.round(num("ePerTree")));
-  const qe = num("qe"), He = num("He");
-  const rowSp = num("rowSp"), treeSp = num("treeSp");
-  const tpr = Math.max(1, Math.round(num("treesPerRow")));
-  const rows = Math.max(1, Math.round(num("rows")));
+/* ================== Zone design (one zone, its own parameters) ================== */
+function designZone(z){
+  const N = f => { const x = parseFloat(z[f]); return isFinite(x) ? x : 0; };
+  const e = Math.max(1, Math.round(N("ePerTree")));
+  const qe = Math.max(0.01, N("qe")), He = N("He");
+  const rowSp = Math.max(0.1, N("rowSp")), treeSp = Math.max(0.1, N("treeSp"));
+  const tpr = Math.max(1, Math.round(N("treesPerRow")));
+  const rows = Math.max(1, Math.round(N("rows")));
   const vmax = num("vmax") || 1.5;
-  const pc = $("pc").value === "1";
-  const allowTotal = pc ? Math.max(0, num("HmaxPC") - He) : He*num("allowPct")/100;
+  const pc = String(z.pc) === "1";
+  const allowTotal = pc ? Math.max(0, N("HmaxPC") - He) : He*num("allowPct")/100;
   const latShare = num("latShare")/100;
-  const slopeRow = num("slopeRow"), slopeSub = num("slopeSub");
-  const feedMid = $("feed").value === "mid", subMid = $("subFeed").value === "mid";
+  const slopeRow = N("slopeRow"), slopeSub = N("slopeSub");
+  const feedMid = z.feed === "mid", subMid = z.subFeed === "mid";
+  const matLat = CATALOG[z.matLat] ? z.matLat : "ldpe", matSub = CATALOG[z.matSub] ? z.matSub : "pvc";
 
   const nRow = tpr*e;
   const latHalves = (feedMid
     ? [{N:Math.ceil(nRow/2), slope:slopeRow}, {N:Math.floor(nRow/2), slope:-slopeRow}]
     : [{N:nRow, slope:slopeRow}]).filter(h => h.N > 0);
-  const lat = designLine({halves:latHalves, qOut:qe/1000, s:treeSp/e, mat:$("matLat").value, vmax, allow:allowTotal*latShare, Hreq:He});
+  const lat = designLine({halves:latHalves, qOut:qe/1000, s:treeSp/e, mat:matLat, vmax, allow:allowTotal*latShare, Hreq:He});
 
   const rowQ = lat.Qtot;
   const subAllow = lat.pick ? Math.max(0, allowTotal - lat.pick.vari) : allowTotal*(1 - latShare);
   const subHalves = (subMid
     ? [{N:Math.ceil(rows/2), slope:slopeSub}, {N:Math.floor(rows/2), slope:-slopeSub}]
     : [{N:rows, slope:slopeSub}]).filter(h => h.N > 0);
-  const sub = designLine({halves:subHalves, qOut:rowQ, s:rowSp, mat:$("matSub").value, vmax, allow:subAllow, Hreq:lat.use.Hin, minorPct:num("minor")});
+  const sub = designLine({halves:subHalves, qOut:rowQ, s:rowSp, mat:matSub, vmax, allow:subAllow, Hreq:lat.use.Hin, minorPct:num("minor")});
 
   lat.pc = sub.pc = pc;
-  return {pc, lat, sub, e, qe, He, tpr, rows, rowSp, treeSp, feedMid, subMid, slopeRow, slopeSub, allowTotal,
-          zoneQ: sub.Qtot, Hzone: sub.use.Hin, zoneTrees: tpr*rows, areaHa: tpr*rows*rowSp*treeSp/1e4};
+  const T = N("litersPerTree") > 0 ? N("litersPerTree")/(e*qe) : 0;
+  return {pc, lat, sub, e, qe, He, tpr, rows, rowSp, treeSp, feedMid, subMid, slopeRow, slopeSub, allowTotal, T,
+          zoneQ: sub.Qtot, Hzone: sub.use.Hin, zoneTrees: tpr*rows, areaHa: tpr*rows*rowSp*treeSp/1e4,
+          ok: !!(lat.pick && sub.pick)};
 }
 
 /* ================== Network (tree) model ================== */
 function buildTree(net){
   const R = net.length;
   const rows = net.map((r, i) => ({i, node:i+1, from: Math.min(Math.max(0, Math.round(+r.from || 0)), i),
-    L: Math.max(0, +r.L || 0), z: +r.z || 0, n: Math.max(0, +r.n || 0)}));
+    L: Math.max(0, +r.L || 0), z: +r.z || 0}));
   const kids = Array.from({length:R+1}, () => []);       // child rows of each point
   rows.forEach(r => kids[r.from].push(r.i));
   const zNode = [0, ...rows.map(r => r.z)];
   const dist = new Array(R+1).fill(0);
   rows.forEach(r => dist[r.node] = dist[r.from] + r.L);
-  const order = [], depth = new Array(R+1).fill(0);
-  (function dfs(v){ for (const ri of kids[v]){ order.push(ri); depth[rows[ri].node] = depth[v] + 1; dfs(rows[ri].node); } })(0);
-  const units = [];                                       // irrigation zones in depth-first order
-  for (const ri of order){
-    const r = rows[ri], full = Math.floor(r.n + 1e-9);
-    for (let k = 0; k < full; k++) units.push({node:r.node, frac:1});
-    if (r.n - full > 1e-3) units.push({node:r.node, frac:r.n - full});
+  const order = [], depth = new Array(R+1).fill(0), pos = new Array(R+1).fill(0);
+  (function dfs(v){ for (const ri of kids[v]){ order.push(ri); const w = rows[ri].node; depth[w] = depth[v] + 1; pos[w] = order.length; dfs(w); } })(0);
+  return {rows, kids, zNode, dist, order, depth, pos};
+}
+const clampPoint = (p, R) => Math.min(Math.max(0, Math.round(+p || 0)), R);
+
+/* Zones expanded into units (one per physical zone), in depth-first order of the network */
+function buildFarm(){
+  const tree = buildTree(NET), R = tree.rows.length;
+  const designs = ZONES.map(designZone);
+  const idx = ZONES.map((_, i) => i).sort((a, b) =>
+    tree.pos[clampPoint(ZONES[a].point, R)] - tree.pos[clampPoint(ZONES[b].point, R)] || a - b);
+  const units = [];
+  for (const i of idx){
+    const z = ZONES[i], d = designs[i], c = Math.max(1, Math.round(+z.count || 1));
+    for (let k = 0; k < c; k++) units.push({zi:i, node: clampPoint(z.point, R), Q:d.zoneQ, H:d.Hzone, T:d.T,
+      label: c > 1 ? `${z.name} #${k+1}` : z.name, mturn: Math.max(1, Math.round(+z.turn || 1))});
   }
-  return {rows, kids, zNode, dist, order, depth, units};
+  return {tree, designs, units};
 }
 
-/* "spread": round-robin over depth-first order -> every branch carries the fewest zones per turn.
-   "cluster": contiguous blocks of neighbouring zones. */
-function assignTurns(U, K, how){
-  return Array.from({length:U}, (_, i) => how === "cluster" ? Math.floor(i*K/U) : i % K);
+/* spread: depth-first order, each zone to the turn with the least flow so far (equal zones -> round-robin)
+   cluster: contiguous blocks of neighbouring zones with similar total flow */
+function assignTurns(units, K, how){
+  const U = units.length, out = new Array(U);
+  if (how === "cluster"){
+    const F = units.reduce((a,u) => a + u.Q, 0);
+    let t = 0, cum = 0;
+    for (let i = 0; i < U; i++){
+      out[i] = t; cum += units[i].Q;
+      const remZ = U - 1 - i, remT = K - 1 - t;
+      if (remT > 0 && (cum >= (t+1)*F/K - 1e-9 || remZ === remT)) t++;
+    }
+  } else {
+    const load = new Float64Array(K);
+    for (let i = 0; i < U; i++){
+      let bt = 0;
+      for (let t = 1; t < K; t++) if (load[t] < load[bt] - 1e-9) bt = t;
+      out[i] = bt; load[bt] += units[i].Q;
+    }
+  }
+  return out;
 }
-function perTurnText(U, K){
-  if (K === 1) return `mở cả ${U} khu cùng lúc`;
-  const a = Math.floor(U/K), b = Math.ceil(U/K);
+function planFor(ctx, id){
+  const U = ctx.units.length;
+  if (id === "m"){
+    const vals = [...new Set(ctx.units.map(u => u.mturn))].sort((a,b) => a-b);
+    return {id:"m", K:vals.length, turnOf: ctx.units.map(u => vals.indexOf(u.mturn)), short:"Tự xếp", label:`Tự xếp (${vals.length} lượt)`};
+  }
+  const K = Math.max(1, Math.min(+id || 1, U));
+  return {id:K, K, turnOf: assignTurns(ctx.units, K, ctx.how === "cluster" ? "cluster" : "spread"), short:`${K} lượt`, label:`${K} lượt`};
+}
+function countsText(plan, U){
+  const c = new Array(plan.K).fill(0);
+  plan.turnOf.forEach(t => c[t]++);
+  if (plan.K === 1) return `mở cả ${U} khu cùng lúc`;
+  const a = Math.min(...c), b = Math.max(...c);
   return a === b ? `mỗi lượt ${a} khu` : `mỗi lượt ${a}–${b} khu`;
 }
 
@@ -660,29 +740,33 @@ function solveNetwork(pn, edges, capMax, S, polish){
   return null;
 }
 
-/* Evaluate one operating plan: K turns */
-function evalAlt(ctx, K, opt={}){
-  const {tree, Z, sizes, cat} = ctx;
+/* Evaluate one operating plan (which zones open together in each turn) */
+function evalAlt(ctx, plan, opt={}){
+  const {tree, units, sizes, cat} = ctx;
   const J = opt.J ?? ctx.J;
-  const U = tree.units.length, R = tree.rows.length, S = sizes.length;
-  K = Math.max(1, Math.min(K, U));
-  const turnOf = assignTurns(U, K, ctx.how);
+  const {K, turnOf} = plan;
+  const R = tree.rows.length, S = sizes.length, U = units.length;
 
-  // flow through the pipe ending at each point, per turn
+  // flow through the pipe ending at each point, per turn; head needed by the zones at each point
   const F = Array.from({length:R+1}, () => new Float64Array(K));
-  const Qturn = new Float64Array(K);
+  const Qturn = new Float64Array(K), Vturn = new Float64Array(K), Dturn = new Float64Array(K);
+  const Hmax = Array.from({length:R+1}, () => new Float64Array(K).fill(-Infinity));
+  const Hmin = Array.from({length:R+1}, () => new Float64Array(K).fill(Infinity));
   const turnsAt = Array.from({length:R+1}, () => new Set());
-  tree.units.forEach((u, i) => {
-    const t = turnOf[i], q = u.frac*Z.zoneQ;
-    Qturn[t] += q; turnsAt[u.node].add(t);
-    for (let v = u.node; v !== 0; v = tree.rows[v-1].from) F[v][t] += q;
+  units.forEach((u, i) => {
+    const t = turnOf[i];
+    Qturn[t] += u.Q; Vturn[t] += u.Q*u.T; Dturn[t] = Math.max(Dturn[t], u.T);
+    Hmax[u.node][t] = Math.max(Hmax[u.node][t], u.H); Hmin[u.node][t] = Math.min(Hmin[u.node][t], u.H);
+    turnsAt[u.node].add(t);
+    for (let v = u.node; v !== 0; v = tree.rows[v-1].from) F[v][t] += u.Q;
   });
   const Qd = F.map(a => Math.max(0, ...a));
+  const Hall = Hmax.map(a => Math.max(...a));
 
   // split every pipe into short pieces
   const totalLen = tree.rows.reduce((a,r) => a + r.L, 0);
   const pieceLen = Math.max(10, totalLen/40);
-  const pn = [{parent:-1, row:-1, node:0, len:0, z:0, dist:0, req:-Infinity, rowEnd:0}];
+  const pn = [{parent:-1, row:-1, node:0, len:0, z:0, dist:0, req:Hall[0], rowEnd:0}];
   const endPiece = new Array(R+1).fill(0);
   for (const r of tree.rows){
     const k = Math.max(1, Math.round(r.L/pieceLen));
@@ -691,7 +775,7 @@ function evalAlt(ctx, K, opt={}){
     for (let j = 1; j <= k; j++){
       const last = j === k, hasZone = last && turnsAt[r.node].size > 0;
       pn.push({parent:par, row:r.i, node:r.node, len:r.L/k, z:z0 + (r.z - z0)*j/k, dist:d0 + r.L*j/k,
-               req: hasZone ? Z.Hzone : (flowing ? ctx.minP : -Infinity), rowEnd: last ? r.node : 0});
+               req: hasZone ? Math.max(Hall[r.node], ctx.minP) : (flowing ? ctx.minP : -Infinity), rowEnd: last ? r.node : 0});
       par = pn.length - 1;
     }
     endPiece[r.node] = par;
@@ -699,7 +783,7 @@ function evalAlt(ctx, K, opt={}){
   // pump head may not exceed M + B (M = head the hardest point needs with zero friction)
   let M = -Infinity;
   for (const p of pn) if (isFinite(p.req)) M = Math.max(M, p.z + p.req);
-  const B = J*Math.max(...tree.dist)/100;
+  const B = J*Math.max(0, ...tree.dist)/100;
   let capMax = 0;
   for (const p of pn){ p.cap = isFinite(p.req) ? B + M - (p.z + p.req) : Infinity; if (isFinite(p.cap)) capMax = Math.max(capMax, p.cap); }
   for (let i = 1; i < pn.length; i++){
@@ -710,7 +794,7 @@ function evalAlt(ctx, K, opt={}){
       return {v, okV: v <= ctx.vmax + 1e-9, dh: hwLoss(Q/3600, sz.D, p.len, cat.C)*ctx.mult, cost: p.len*sz.ppm};
     });
   }
-  const base = {K, U, turnOf, Qturn, F, Qd, turnsAt, pn, endPiece, B, M, J, tree, Z, sizes};
+  const base = {id:plan.id, K, short:plan.short, label:plan.label, plan, U, turnOf, Qturn, F, Qd, turnsAt, Hmax, Hmin, pn, endPiece, B, M, J, tree, sizes};
   if (!(M > -Infinity)) return {...base, ok:false, reason:"nozone"};
 
   const edges = [];
@@ -729,28 +813,29 @@ function evalAlt(ctx, K, opt={}){
   const turns = [];
   for (let t = 0; t < K; t++){
     const lossT = new Float64Array(pn.length);
-    let Hp = -Infinity, crit = 0;
+    let Hp = Hmax[0][t], crit = 0;                        // zones right at the pump
     for (let i = 1; i < pn.length; i++){
       const p = pn[i], Q = F[p.node][t], sz = sizes[sol.size[i]];
       lossT[i] = lossT[p.parent] + hwLoss(Q/3600, sz.D, p.len, cat.C)*ctx.mult;
       let need = -Infinity;
-      if (p.rowEnd && turnsAt[p.rowEnd].has(t)) need = p.z + Z.Hzone + lossT[i];
+      if (p.rowEnd && Hmax[p.rowEnd][t] > -Infinity) need = p.z + Math.max(Hmax[p.rowEnd][t], ctx.minP) + lossT[i];
       else if (Q > 1e-9) need = p.z + ctx.minP + lossT[i];
       if (need > Hp){ Hp = need; crit = i; }
     }
     const TDH = ctx.suction + ctx.Hf + Hp;
-    turns.push({t, Q:Qturn[t], Hp, TDH, lossT, crit, kWe: 9.81*(Qturn[t]/3600)*TDH/ctx.eta/0.85});
+    turns.push({t, Q:Qturn[t], Hp, TDH, lossT, crit, D:Dturn[t],
+      kWh: 9.81*Vturn[t]*TDH/(3600*ctx.eta*0.85), kWe: 9.81*(Qturn[t]/3600)*TDH/ctx.eta/0.85});
   }
   const Qmax = Math.max(...turns.map(x => x.Q)), TDHmax = Math.max(...turns.map(x => x.TDH));
   const kW = 9.81*(Qmax/3600)*TDHmax/ctx.eta, HP = kW/0.746;
   const pickHP = STD_HP.find(h => h >= HP*1.1) || Math.ceil(HP*1.1);
-  const roundHours = K*ctx.turnHours;
-  const energyYear = turns.reduce((a,x) => a + x.kWe, 0)*ctx.turnHours*ctx.seasons*ctx.elecPrice;
+  const roundHours = turns.reduce((a,x) => a + x.D, 0);
+  const energyYear = turns.reduce((a,x) => a + x.kWh, 0)*ctx.seasons*ctx.elecPrice;
   const pumpCost = pickHP*ctx.pumpPrice;
   const days = roundHours/ctx.hoursPerDay;
   const flags = [];
   if (Qmax > ctx.sourceQ + 1e-9) flags.push({hard:true, text:`vượt nguồn nước ${fmt0(ctx.sourceQ)} m³/h`});
-  if (days > ctx.maxDays + 1e-9) flags.push({hard:true, text:`quá ${fmtN(ctx.maxDays)} ngày`});
+  if (days > ctx.maxDays + 1e-9) flags.push({hard:true, text:`quá ${fmt(ctx.maxDays, ctx.maxDays % 1 ? 1 : 0)} ngày`});
   if (pickHP > 3) flags.push({hard:false, text:"cần điện 3 pha"});
   const res = {...base, ok:true, size:sol.size, lossD:sol.loss, pipeCost:sol.cost, turns, Qmax, TDHmax, kW, HP, pickHP,
     pumpCost, energyYear, roundHours, days, flags, hard: flags.some(f => f.hard),
@@ -779,15 +864,13 @@ function evalAlt(ctx, K, opt={}){
 }
 
 function makeCtx(){
-  const Z = designZone();
-  const tree = buildTree(NET);
+  const farm = buildFarm();
   const mat = $("matMain").value, cat = CATALOG[mat];
   const sizes = cat.pipes.map(([od,t]) => ({od, t, id:od-2*t, D:(od-2*t)/1000, ppm: pricePerM(mat, od, t)}));
   const src = $("sourceQ").value.trim();
-  return {Z, tree, mat, cat, sizes, how: $("assign").value === "cluster" ? "cluster" : "spread",
+  return {...farm, mat, cat, sizes, how: $("assign").value,
     vmax: num("vmax") || 1.5, minP: num("minP"), mult: 1 + num("minor")/100, J: num("Jmain") || 2,
     suction: num("suction"), Hf: num("Hfilter"), eta: Math.max(0.2, num("eta")/100),
-    turnHours: num("litersPerTree") > 0 ? num("litersPerTree")/(Z.e*Z.qe) : 0,
     seasons: num("seasons"), elecPrice: num("elecPrice"), pumpPrice: num("pumpPrice")*1e6,
     hoursPerDay: Math.max(1, num("hoursPerDay")), maxDays: num("maxDays") || Infinity,
     sourceQ: src === "" || !(parseFloat(src) > 0) ? Infinity : parseFloat(src), years: Math.max(1, num("years"))};
@@ -877,13 +960,13 @@ function placeTip(tip, x, W, top){
 /* ---------- Elevation profile along one route, in one turn ---------- */
 let lastProfile = null;
 function buildProfile(alt, leaf, t){
-  const {pn, endPiece, sizes, size, turns, turnsAt, Z} = alt;
+  const {pn, endPiece, sizes, size, turns, Hmax} = alt;
   const T = turns[t];
   const path = [];
   for (let i = endPiece[leaf]; i > 0; i = pn[i].parent) path.unshift(i);
   const pts = [{x:0, z:0, hgl:T.Hp, od: path.length ? sizes[size[path[0]]].od : null}];
   for (const i of path) pts.push({x:pn[i].dist, z:pn[i].z, hgl:T.Hp - T.lossT[i], od:sizes[size[i]].od, pt: pn[i].rowEnd});
-  const takes = path.filter(i => pn[i].rowEnd && turnsAt[pn[i].rowEnd].has(t)).map(i => ({x:pn[i].dist, y:pn[i].z + Z.Hzone}));
+  const takes = path.filter(i => pn[i].rowEnd && Hmax[pn[i].rowEnd][t] > -Infinity).map(i => ({x:pn[i].dist, y:pn[i].z + Hmax[pn[i].rowEnd][t]}));
   return {totalL: Math.max(1, pts[pts.length-1].x), pts, takes};
 }
 
@@ -935,14 +1018,15 @@ function drawProfile(){
   host.innerHTML = svg + `<div class="tip" id="tip"></div>`;
 
   const hov = host.querySelector("#hov"), tip = host.querySelector("#tip"), hit = host.querySelector("#hit");
+  const line = host.querySelector("#hovLine"), dH = host.querySelector("#hovH"), dG = host.querySelector("#hovG");
   let cur = -1;
   function show(i){
     cur = Math.max(0, Math.min(pts.length-1, i));
     const p = pts[cur];
     hov.style.display = "";
-    for (const id of ["#hovLine"]){ const el = host.querySelector(id); el.setAttribute("x1", sx(p.x)); el.setAttribute("x2", sx(p.x)); }
-    host.querySelector("#hovH").setAttribute("cx", sx(p.x)); host.querySelector("#hovH").setAttribute("cy", sy(p.hgl));
-    host.querySelector("#hovG").setAttribute("cx", sx(p.x)); host.querySelector("#hovG").setAttribute("cy", sy(p.z));
+    line.setAttribute("x1", sx(p.x)); line.setAttribute("x2", sx(p.x));
+    dH.setAttribute("cx", sx(p.x)); dH.setAttribute("cy", sy(p.hgl));
+    dG.setAttribute("cx", sx(p.x)); dG.setAttribute("cy", sy(p.z));
     tip.replaceChildren();
     const hd = document.createElement("div"); hd.className = "hd";
     hd.textContent = `Cách bơm ${fmt0(p.x)} m` + (p.pt ? ` · điểm Đ${p.pt}` : "") + (p.od ? ` · ống Ø${p.od}` : "");
@@ -977,14 +1061,14 @@ function drawCompare(){
   if (!host || !ALTS) return;
   const A = ALTS.list, years = ALTS.years;
   const W = Math.max(300, host.clientWidth), rowH = 30, barH = 16;
-  const m = {l:70, r:84, t:4, b:28};
+  const m = {l:74, r:84, t:4, b:28};
   const H = m.t + A.length*rowH + m.b, pw = W - m.l - m.r;
   const maxT = Math.max(1, ...A.filter(a => a.ok).map(a => a.total));
   const X = niceScale(0, maxT, Math.max(2, Math.floor(pw/90)));
   const sx = v => m.l + v/X.b*pw;
   const names = ["Ống chính & nhánh", "Bơm + tủ điện", `Tiền điện ${years} năm`];
   const cols = ["var(--s1)", "var(--s2)", "var(--s3)"];
-  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tổng chi phí theo số lượt tưới">`;
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Tổng chi phí theo phương án vận hành">`;
   for (const t of X.ticks){
     svg += `<line x1="${sx(t)}" x2="${sx(t)}" y1="${m.t}" y2="${m.t + A.length*rowH}" stroke="var(--grid)" stroke-width="1"/>`;
     svg += `<text x="${sx(t)}" y="${m.t + A.length*rowH + 15}" text-anchor="middle" font-size="11" fill="var(--tick)" style="font-variant-numeric:tabular-nums">${fmt0(t/1e6)}</text>`;
@@ -992,9 +1076,9 @@ function drawCompare(){
   svg += `<text x="${m.l + pw/2}" y="${H-2}" text-anchor="middle" font-size="11" fill="var(--tick)">triệu đồng</text>`;
   svg += `<line x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${m.t + A.length*rowH}" stroke="var(--axis)" stroke-width="1"/>`;
   A.forEach((a, i) => {
-    const y0 = m.t + i*rowH, y = y0 + (rowH - barH)/2, selected = CUR && a.K === CUR.K;
-    svg += `<rect class="cmp-row" data-k="${a.K}" x="0" y="${y0}" width="${W}" height="${rowH}" fill="${selected ? 'var(--grid)' : 'transparent'}" fill-opacity="${selected ? 0.6 : 0}"/>`;
-    svg += `<text x="${m.l-8}" y="${y + barH/2 + 4}" text-anchor="end" font-size="12" fill="var(--ink)" font-weight="${selected ? 700 : 400}" pointer-events="none">${a.K} lượt</text>`;
+    const y0 = m.t + i*rowH, y = y0 + (rowH - barH)/2, selected = CUR && String(a.id) === String(CUR.id);
+    svg += `<rect class="cmp-row" data-k="${a.id}" x="0" y="${y0}" width="${W}" height="${rowH}" fill="${selected ? 'var(--grid)' : 'transparent'}" fill-opacity="${selected ? 0.6 : 0}"/>`;
+    svg += `<text x="${m.l-8}" y="${y + barH/2 + 4}" text-anchor="end" font-size="12" fill="var(--ink)" font-weight="${selected ? 700 : 400}" pointer-events="none">${a.short}</text>`;
     if (!a.ok){
       svg += `<text x="${m.l+6}" y="${y + barH/2 + 4}" font-size="11" fill="var(--tick)" pointer-events="none">không có cỡ ống đạt</text>`;
       return;
@@ -1006,13 +1090,13 @@ function drawCompare(){
       if (v <= 0) return;
       const w = sx(v) - sx(0), gap = k < lastIdx ? 2 : 0, ww = Math.max(0.5, w - gap);
       if (k === lastIdx && ww > 5){
-        svg += `<path class="cmp-row" data-k="${a.K}" data-s="${k}" d="M${x},${y}h${ww-4}a4,4 0 0 1 4,4v${barH-8}a4,4 0 0 1 -4,4h${-(ww-4)}Z" fill="${cols[k]}"/>`;
+        svg += `<path class="cmp-row" data-k="${a.id}" d="M${x},${y}h${ww-4}a4,4 0 0 1 4,4v${barH-8}a4,4 0 0 1 -4,4h${-(ww-4)}Z" fill="${cols[k]}"/>`;
       } else {
-        svg += `<rect class="cmp-row" data-k="${a.K}" data-s="${k}" x="${x}" y="${y}" width="${ww}" height="${barH}" fill="${cols[k]}"/>`;
+        svg += `<rect class="cmp-row" data-k="${a.id}" x="${x}" y="${y}" width="${ww}" height="${barH}" fill="${cols[k]}"/>`;
       }
       x += w;
     });
-    const mark = (ALTS.best && a.K === ALTS.best.K ? " ★" : "") + (a.hard ? " ⚠" : "");
+    const mark = (ALTS.best && String(a.id) === String(ALTS.best.id) ? " ★" : "") + (a.hard ? " ⚠" : "");
     svg += `<text x="${x + 6}" y="${y + barH/2 + 4}" font-size="11" fill="var(--ink)" pointer-events="none">${moneyShort(a.total)}${mark}</text>`;
   });
   svg += `</svg>`;
@@ -1021,10 +1105,10 @@ function drawCompare(){
   svgEl.addEventListener("pointermove", e => {
     const el = e.target.closest("[data-k]");
     if (!el){ tip.style.display = "none"; return; }
-    const a = A.find(x => x.K === +el.dataset.k);
+    const a = A.find(x => String(x.id) === el.dataset.k);
     tip.replaceChildren();
     const hd = document.createElement("div"); hd.className = "hd";
-    hd.textContent = `${a.K} lượt · ${perTurnText(a.U, a.K)}`;
+    hd.textContent = `${a.label} · ${countsText(a.plan, a.U)}`;
     tip.appendChild(hd);
     if (a.ok){
       tipRow(tip, money(a.total), `tổng ${years} năm`, null);
@@ -1035,44 +1119,72 @@ function drawCompare(){
     placeTip(tip, (e.clientX - rect.left)*(W/rect.width), W, Math.min(H - 90, Math.max(0, (e.clientY - rect.top)*(W/rect.width) + 10)));
   });
   svgEl.addEventListener("pointerleave", () => tip.style.display = "none");
-  svgEl.addEventListener("click", e => { const el = e.target.closest("[data-k]"); if (el) selectK(+el.dataset.k); });
+  svgEl.addEventListener("click", e => { const el = e.target.closest("[data-k]"); if (el) selectPlan(el.dataset.k); });
 }
 
 let resizeT;
 window.addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => { drawProfile(); drawCompare(); }, 120); });
 
 /* ================== System calculation ================== */
-function selectK(K){
-  $("turns").value = String(K);
+function selectPlan(id){
+  $("turns").value = String(id);
   recalc();
 }
-function turnOptions(U, Klist){
+function turnOptions(U, Klist, manual){
   const sel = $("turns");
   const want = SEL.want != null ? SEL.want : sel.value;
   sel.innerHTML = `<option value="auto">★ Tự chọn phương án kinh tế nhất</option>` +
-    Klist.map(K => `<option value="${K}">${K} lượt – ${perTurnText(U, K)}${K===1?' (bơm lớn nhất)':K===U?' (bơm nhỏ nhất)':''}</option>`).join("");
-  sel.value = Klist.includes(+want) ? String(+want) : "auto";
+    (manual ? `<option value="m">Lịch tự xếp (theo cột “Lượt”)</option>` : "") +
+    Klist.map(K => `<option value="${K}">${K} lượt${K===1?' – mở tất cả (bơm lớn nhất)':K===U?' – từng khu một (bơm nhỏ nhất)':''}</option>`).join("");
+  const valid = ["auto", ...(manual ? ["m"] : []), ...Klist.map(String)];
+  sel.value = valid.includes(String(want)) ? String(want) : "auto";
   SEL.want = null;
 }
 
-function calcSystem(){
-  const ctx = makeCtx(), Z = ctx.Z, tree = ctx.tree;
-  const U = tree.units.length;
-
-  /* ---- zone cards (identical for every plan) ---- */
+function zoneCards(ctx){
+  const z = ZONES[ZSEL], Z = ctx.designs[ZSEL];
+  if (!z || !Z) return "";
   const lat = Z.lat, sub = Z.sub;
   const latNote = `<div class="meta">${Z.feedMid ? 'Cấp ở giữa hàng: 2 nhánh, mỗi nhánh' : 'Mỗi hàng'} dài ${fmt0(lat.len)} m · địa hình: ${slopeText(lat.halves, lat.s)}</div>`;
   const subNote = `<div class="meta">${Z.subMid ? 'Nối ở giữa: 2 phía, mỗi phía' : 'Dài'} ${fmt0(sub.len)} m · địa hình: ${slopeText(sub.halves, sub.s)} · tổn thất cục bộ +${fmt0(num("minor"))}%</div>`;
-  const zoneHtml = `
+  return `<h3 style="margin-top:14px">Chi tiết khu: ${esc(z.name)}</h3>
+    <p class="meta">${Z.zoneTrees.toLocaleString("vi-VN")} cây · ${(Z.zoneTrees*Z.e).toLocaleString("vi-VN")} đầu tưới · ${fmt(Z.areaHa,2)} ha · ${fmt(Z.zoneQ,1)} m³/h · cần <b>${fmt(Z.Hzone,1)} m</b> tại điểm nối · mỗi lần tưới ${fmt(Z.T,1)} giờ</p>
     ${lineCard("Ống tưới (dọc hàng cây)", `Mỗi ${Z.feedMid?'nhánh':'hàng'}: ${Math.max(...lat.halves.map(h=>h.N))} đầu × ${fmt(Z.qe,1)} lít/giờ · áp đầu tưới ${fmt(Z.He,1)} m`, lat, latNote)}
     ${lineCard("Ống nhánh cấp 2 (chạy ngang các hàng)", `Cấp cho ${Z.rows} hàng × ${fmt(lat.Qtot,2)} m³/h`, sub, subNote)}`;
-  const zoneLine = `<p class="meta">1 khu: ${Z.zoneTrees.toLocaleString("vi-VN")} cây · ${(Z.zoneTrees*Z.e).toLocaleString("vi-VN")} đầu tưới · ${fmt(Z.areaHa,2)} ha · ${fmt(Z.zoneQ,1)} m³/h · cần <b>${fmt(Z.Hzone,1)} m</b> tại điểm nối ống chính · mỗi lượt tưới ${fmt(ctx.turnHours,1)} giờ.</p>`;
+}
+
+function zoneSummary(ctx, A){
+  const R = ctx.tree.rows.length;
+  const turnsOfZone = ZONES.map(() => new Set());
+  if (A && A.turnOf) ctx.units.forEach((u, i) => turnsOfZone[u.zi].add(A.turnOf[i] + 1));
+  const rows = ZONES.map((z, i) => {
+    const d = ctx.designs[i], c = Math.max(1, Math.round(+z.count || 1));
+    const st = d.ok ? '<span class="badge b-ok">Đạt</span>' : '<span class="badge b-bad">Xem lại</span>';
+    return `<tr class="${i===ZSEL?'sel':''}">
+      <td><button class="linkbtn" data-zsel="${i}">${esc(z.name)}</button></td>
+      <td>${ptName(clampPoint(z.point, R))}</td><td>${c}</td>
+      <td>${(d.zoneTrees*c).toLocaleString("vi-VN")}</td><td>${fmt(d.areaHa*c,2)}</td>
+      <td>Ø${d.lat.use.od}${d.lat.pick ? '' : ' ⚠'}</td><td>Ø${d.sub.use.od}${d.sub.pick ? '' : ' ⚠'}</td>
+      <td>${fmt(d.zoneQ,1)}</td><td>${fmt(d.Hzone,1)}</td><td>${fmt(d.T,1)}</td>
+      <td>${[...turnsOfZone[i]].sort((a,b)=>a-b).join(", ") || '–'}</td><td>${st}</td></tr>`;
+  }).join("");
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Khu</th><th>Nối vào</th><th>SL</th><th>Cây</th><th>ha</th><th>Ống tưới</th><th>Ống nhánh</th><th>Q 1 khu (m³/h)</th><th>Áp cần (m)</th><th>Giờ / lần</th><th>Lượt</th><th>Trạng thái</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function calcSystem(){
+  const ctx = makeCtx(), tree = ctx.tree, U = ctx.units.length;
+  const manual = ctx.how === "manual";
+  $("zoneTbl").classList.toggle("manual", manual);
+  const trees = ctx.units.reduce((a,u) => a + ctx.designs[u.zi].zoneTrees, 0);
+  const area = ctx.units.reduce((a,u) => a + ctx.designs[u.zi].areaHa, 0);
+  const farmLine = `<p class="meta">Toàn vườn: ${U} khu · ${trees.toLocaleString("vi-VN")} cây · ${fmt(area,2)} ha · ${fmt(ctx.units.reduce((a,u)=>a+u.Q,0),1)} m³/h nếu mở tất cả.</p>`;
 
   if (U === 0){
     CUR = null; ALTS = null; lastProfile = null;
-    turnOptions(1, [1]);
-    $("out").innerHTML = `<h2>Kết quả</h2>${zoneLine}<div class="note">Mạng ống chưa có khu nào lấy nước. Nhập số khu ở cuối ít nhất một đoạn.</div>
-      <h3 style="margin-top:16px">Thiết kế trong 1 khu</h3>${zoneHtml}`;
+    turnOptions(1, [1], false);
+    $("out").innerHTML = `<h2>Kết quả</h2><div class="note">Chưa có khu tưới nào. Bấm “+ Thêm khu”.</div>`;
     return;
   }
 
@@ -1080,26 +1192,29 @@ function calcSystem(){
   let Klist = [];
   if (U <= 10) for (let k = 1; k <= U; k++) Klist.push(k);
   else Klist = [...new Set([1,2,3,4,5,6,8,10,12,15,20,25,30,40,50].filter(k => k <= U).concat([U]))].sort((a,b) => a-b);
-  turnOptions(U, Klist);
-  const alts = Klist.map(K => evalAlt(ctx, K));
+  turnOptions(U, Klist, manual);
+  const plans = Klist.map(K => planFor(ctx, K));
+  if (manual) plans.unshift(planFor(ctx, "m"));
+  const alts = plans.map(p => evalAlt(ctx, p));
   const okAlts = alts.filter(a => a.ok), feasible = okAlts.filter(a => !a.hard);
   const cheapest = list => list.length ? list.reduce((a,b) => b.total < a.total - 1 ? b : a) : null;
   const best = cheapest(feasible), cheapestOk = cheapest(okAlts);
   const fastest = feasible.length ? feasible.reduce((a,b) => b.roundHours < a.roundHours ? b : a) : null;
   const selV = $("turns").value;
-  const Ksel = selV === "auto" ? (best || cheapestOk || {K:1}).K : +selV;
-  const A = evalAlt(ctx, Ksel, {baseline:true});
+  const selId = selV === "auto" ? (best || cheapestOk || {id:1}).id : (selV === "m" ? "m" : +selV);
+  const A = evalAlt(ctx, planFor(ctx, selId), {baseline:true});
   CUR = A;
   ALTS = {list: alts, best, years: ctx.years};
 
   /* ---- comparison table ---- */
   const cmpRows = alts.map(a => {
-    const tag = (best && a.K === best.K ? " ★" : "");
-    if (!a.ok) return `<tr class="cmp-row ${a.K===A.K?'sel':''}" data-k="${a.K}"><td><button class="linkbtn" data-k="${a.K}">${a.K} lượt</button></td><td>${perTurnText(U, a.K)}</td><td colspan="7" style="text-align:left">${a.reason==='velocity' ? `Lưu lượng ${fmt(a.worst.Q,0)} m³/h quá lớn so với cỡ ống lớn nhất` : 'Không có cách phối ống nào đủ áp'}</td></tr>`;
-    return `<tr class="cmp-row ${a.K===A.K?'sel':''}" data-k="${a.K}">
-      <td><button class="linkbtn" data-k="${a.K}">${a.K} lượt</button>${tag}</td>
-      <td>${perTurnText(U, a.K)}</td>
-      <td>${fmt(a.Qmax,1)} m³/h · ${fmt0(a.TDHmax)} m · ${a.pickHP} HP</td>
+    const tag = (best && a.id === best.id ? " ★" : "");
+    const sel = String(a.id) === String(A.id) ? "sel" : "";
+    if (!a.ok) return `<tr class="cmp-row ${sel}" data-k="${a.id}"><td><button class="linkbtn" data-k="${a.id}">${a.label}</button></td><td>${countsText(a.plan, U)}</td><td colspan="7" style="text-align:left">${a.reason==='velocity' ? `Lưu lượng ${fmt(a.worst.Q,0)} m³/h quá lớn so với cỡ ống lớn nhất` : 'Không có cách phối ống nào đủ áp'}</td></tr>`;
+    return `<tr class="cmp-row ${sel}" data-k="${a.id}">
+      <td><button class="linkbtn" data-k="${a.id}">${a.label}</button>${tag}</td>
+      <td>${countsText(a.plan, U)}</td>
+      <td>${fmt(a.Qmax,1)} m³/h · ${fmt0(a.TDHmax)} m · ${hp(a.pickHP)} HP</td>
       <td>${money(a.pipeCost)}</td>
       <td>${money(a.pumpCost)}</td>
       <td>${fmt(a.roundHours,1)} giờ (${fmt(a.days,1)} ngày)</td>
@@ -1110,17 +1225,17 @@ function calcSystem(){
   }).join("");
   let verdict = "";
   if (best){
-    const big = alts.find(a => a.K === 1);
-    verdict = `<div class="good">★ <b>Kinh tế nhất sau ${ctx.years} năm: ${best.K} lượt</b> (${perTurnText(U, best.K)}), bơm ~${best.pickHP} HP, tổng ${money(best.total)}${big && big.ok && big.K !== best.K ? `, rẻ hơn phương án 1 bơm lớn tưới 1 lượt ${money(big.total - best.total)}` : ''}. ${fastest && fastest.K !== best.K ? `Nhanh nhất: ${fastest.K} lượt, tưới xong 1 vòng trong ${fmt(fastest.roundHours,1)} giờ.` : ''}</div>`;
+    const big = alts.find(a => a.id === 1);
+    verdict = `<div class="good">★ <b>Kinh tế nhất sau ${ctx.years} năm: ${best.label}</b> (${countsText(best.plan, U)}), bơm ~${hp(best.pickHP)} HP, tổng ${money(best.total)}${big && big.ok && big.id !== best.id ? `, rẻ hơn phương án 1 bơm lớn tưới 1 lượt ${money(big.total - best.total)}` : ''}. ${fastest && fastest.id !== best.id ? `Nhanh nhất: ${fastest.label}, tưới xong 1 vòng trong ${fmt(fastest.roundHours,1)} giờ.` : ''}</div>`;
   } else if (cheapestOk){
-    verdict = `<div class="note">Không phương án nào thỏa hết điều kiện về nguồn nước và thời gian tưới (⚠). Rẻ nhất trong số đó là ${cheapestOk.K} lượt (${money(cheapestOk.total)}). Thử tăng số giờ bơm/ngày hoặc số ngày cho 1 vòng, tìm thêm nguồn nước, hay giảm lượng nước mỗi lần tưới và tưới dày hơn.</div>`;
+    verdict = `<div class="note">Không phương án nào thỏa hết điều kiện về nguồn nước và thời gian tưới (⚠). Rẻ nhất trong số đó là ${cheapestOk.label} (${money(cheapestOk.total)}). Thử tăng số giờ bơm/ngày hoặc số ngày cho 1 vòng, tìm thêm nguồn nước, hay giảm lượng nước mỗi lần tưới và tưới dày hơn.</div>`;
   } else verdict = `<div class="note">Không phương án nào chọn được ống. Thử đổi vật liệu ống chính có cỡ lớn hơn, tăng tổn thất cho phép, hoặc tăng số lượt tưới.</div>`;
 
   const cmpHtml = `<div class="seg">
     <div class="seg-head"><h3>So sánh phương án: bơm lớn tưới 1 lượt ↔ bơm nhỏ tưới nhiều lượt</h3></div>
-    <div class="meta">${U} khu · chia lượt: ${ctx.how === 'cluster' ? 'theo cụm khu liền nhau' : 'rải đều các nhánh'} · ống trong khu như nhau ở mọi phương án nên không tính. Bấm vào một phương án để xem chi tiết.</div>
+    <div class="meta">${U} khu · chia lượt: ${ctx.how === 'cluster' ? 'theo cụm khu liền nhau' : ctx.how === 'manual' ? 'tự xếp (các phương án tự động rải đều các nhánh để so sánh)' : 'rải đều các nhánh'} · ống trong khu như nhau ở mọi phương án nên không tính. Bấm vào một phương án để xem chi tiết.</div>
     <div class="viz">
-      <div class="ttl">Tổng chi phí ${ctx.years} năm theo số lượt tưới</div>
+      <div class="ttl">Tổng chi phí ${ctx.years} năm theo phương án</div>
       <div class="legend">
         <span><i class="key-box" style="background:var(--s1)"></i>Ống chính &amp; nhánh</span>
         <span><i class="key-box" style="background:var(--s2)"></i>Bơm + tủ điện</span>
@@ -1137,22 +1252,21 @@ function calcSystem(){
   /* ---- details of the plan being viewed ---- */
   let detailHtml = "", kpis = "";
   if (A.ok){
-    const pn = A.pn, sizes = A.sizes;
-    // KPIs
+    const pn = A.pn, sizes = A.sizes, R = tree.rows.length;
     kpis = `<div class="kpis">
-      <div class="kpi"><div class="v">${fmt(A.Qmax,1)} m³/h</div><div class="l">Bơm: cột áp ${fmt(A.TDHmax,1)} m (≈ ${fmt(bar(A.TDHmax),1)} bar), công suất ${fmt(A.kW,1)} kW, chọn khoảng ${A.pickHP} HP</div></div>
+      <div class="kpi"><div class="v">${fmt(A.Qmax,1)} m³/h</div><div class="l">Bơm: cột áp ${fmt(A.TDHmax,1)} m (≈ ${fmt(bar(A.TDHmax),1)} bar), công suất ${fmt(A.kW,1)} kW, chọn khoảng ${hp(A.pickHP)} HP</div></div>
       <div class="kpi"><div class="v">${money(A.pipeCost + A.pumpCost)}</div><div class="l">Đầu tư ống chính &amp; nhánh ${money(A.pipeCost)} + bơm ${money(A.pumpCost)}</div></div>
-      <div class="kpi"><div class="v">${fmt(A.roundHours,1)} giờ</div><div class="l">Tưới xong 1 vòng: ${A.K} lượt × ${fmt(ctx.turnHours,1)} giờ ≈ ${fmt(A.days,1)} ngày (${fmt0(ctx.hoursPerDay)} giờ/ngày)</div></div>
+      <div class="kpi"><div class="v">${fmt(A.roundHours,1)} giờ</div><div class="l">Tưới xong 1 vòng (${A.K} lượt) ≈ ${fmt(A.days,1)} ngày với ${fmt0(ctx.hoursPerDay)} giờ/ngày</div></div>
       <div class="kpi"><div class="v">${money(A.energyYear)}</div><div class="l">Tiền điện mỗi năm · ${ctx.years} năm: ${money(A.energyYear*ctx.years)}</div></div>
     </div>`;
 
     // schedule
-    const turnZones = Array.from({length:A.K}, () => new Map());
-    tree.units.forEach((u, i) => { const mp = turnZones[A.turnOf[i]]; mp.set(u.node, (mp.get(u.node) || 0) + u.frac); });
+    const turnUnits = Array.from({length:A.K}, () => []);
+    ctx.units.forEach((u, i) => turnUnits[A.turnOf[i]].push(u));
     const schedRows = A.turns.map(T => `<tr>
       <td>Lượt ${T.t+1}</td>
-      <td class="wrap">${[...turnZones[T.t]].map(([v, c]) => `Đ${v}${c !== 1 ? ' × ' + fmtN(c) + ' khu' : ''}`).join(", ")}</td>
-      <td>${fmt(T.Q,1)}</td><td>${fmt(T.TDH,1)}</td><td>${fmt(T.kWe*0.85,1)}</td></tr>`).join("");
+      <td class="wrap">${turnUnits[T.t].map(u => `${esc(u.label)} <span class="meta">(${ptName(u.node)}, ${fmt(u.T,1)} giờ)</span>`).join(", ")}</td>
+      <td>${fmt(T.Q,1)}</td><td>${fmt(T.TDH,1)}</td><td>${fmt(T.kWe*0.85,1)}</td><td>${fmt(T.D,1)}</td></tr>`).join("");
 
     // pipes per row
     const runsByRow = tree.rows.map(() => []);
@@ -1160,13 +1274,15 @@ function calcSystem(){
       const p = pn[i], list = runsByRow[p.row], od = sizes[A.size[i]].od, last = list[list.length-1];
       if (last && last.od === od) last.len += p.len; else list.push({od, len:p.len});
     }
+    const zonesAt = Array.from({length:R+1}, () => []);
+    ZONES.forEach(z => zonesAt[clampPoint(z.point, R)].push(z));
     const rowHtml = tree.order.map(ri => {
       const r = tree.rows[ri];
-      let zmin = tree.zNode[r.from], vmaxRow = 0;
-      for (let i = 1; i < pn.length; i++) if (pn[i].row === ri){ zmin = Math.min(zmin, pn[i].z); vmaxRow = Math.max(vmaxRow, pn[i].ps[A.size[i]].v); }
-      let cost = 0; for (let i = 1; i < pn.length; i++) if (pn[i].row === ri) cost += pn[i].ps[A.size[i]].cost;
+      let zmin = tree.zNode[r.from], vmaxRow = 0, cost = 0;
+      for (let i = 1; i < pn.length; i++) if (pn[i].row === ri){ zmin = Math.min(zmin, pn[i].z); vmaxRow = Math.max(vmaxRow, pn[i].ps[A.size[i]].v); cost += pn[i].ps[A.size[i]].cost; }
+      const zl = zonesAt[r.node].map(z => esc(z.name)).join(", ");
       return `<div class="rowblk" style="margin-left:${Math.min(4, tree.depth[r.node]-1)*14}px">
-        <div><b>${ptName(r.from)} → Đ${r.node}</b> <span class="meta">· ${fmt0(r.L)} m · Q ${fmt(A.Qd[r.node],1)} m³/h · v ≤ ${fmt(vmaxRow,2)} m/s · PN ≥ ${pnFor(A.HshutOut - zmin)} · ${money(cost)}${r.n > 0 ? ' · ' + fmtN(r.n) + ' khu ở cuối' : ''}</span></div>
+        <div><b>${ptName(r.from)} → Đ${r.node}</b> <span class="meta">· ${fmt0(r.L)} m · Q ${fmt(A.Qd[r.node],1)} m³/h · v ≤ ${fmt(vmaxRow,2)} m/s · PN ≥ ${pnFor(A.HshutOut - zmin)} · ${money(cost)}${zl ? ' · khu: ' + zl : ''}</span></div>
         <div class="chips">${runsByRow[ri].map(x => `<span class="chip"><b>Ø${x.od}</b>${fmt0(x.len)} m</span>`).join("")}</div>
       </div>`;
     }).join("");
@@ -1180,30 +1296,31 @@ function calcSystem(){
     // profile selectors
     const leaves = tree.rows.map(r => r.node).filter(v => tree.kids[v].length === 0);
     const critTurn = A.turns.reduce((a,b) => b.TDH > a.TDH ? b : a).t;
-    if (SEL.turn == null || SEL.turn >= A.K || SEL.K !== A.K) SEL.turn = critTurn;
-    if (SEL.path == null || !leaves.includes(SEL.path) || SEL.K !== A.K){
+    const key = String(A.id) + ":" + A.K;
+    if (SEL.turn == null || SEL.turn >= A.K || SEL.key !== key) SEL.turn = critTurn;
+    if (leaves.length && (SEL.path == null || !leaves.includes(SEL.path) || SEL.key !== key)){
       let v = pn[A.turns[SEL.turn].crit].node;
       while (tree.kids[v].length) v = tree.rows[tree.kids[v][0]].node;
       SEL.path = leaves.includes(v) ? v : leaves[0];
     }
-    SEL.K = A.K;
+    SEL.key = key;
     const pathLabel = leaf => { const seq = []; for (let v = leaf; v !== 0; v = tree.rows[v-1].from) seq.unshift(ptName(v)); return "Bơm → " + seq.join(" → "); };
     const pathOpts = leaves.map(v => `<option value="${v}" ${v===SEL.path?'selected':''}>${pathLabel(v)}</option>`).join("");
     const turnOpts = A.turns.map(T => `<option value="${T.t}" ${T.t===SEL.turn?'selected':''}>Lượt ${T.t+1}${T.t===critTurn?' (nặng nhất)':''}</option>`).join("");
-    lastProfile = buildProfile(A, SEL.path, SEL.turn);
+    lastProfile = leaves.length ? buildProfile(A, SEL.path, SEL.turn) : null;
 
     // node table
     const nodeRows = tree.order.map(ri => {
       const r = tree.rows[ri], v = r.node, i = A.endPiece[v], p = pn[i];
       const ts = [...A.turnsAt[v]].sort((a,b) => a-b);
-      const press = [];
-      if (ts.length) ts.forEach(t => press.push(A.turns[t].Hp - p.z - A.turns[t].lossT[i]));
+      const press = [], excess = [];
+      if (ts.length) ts.forEach(t => { const P = A.turns[t].Hp - p.z - A.turns[t].lossT[i]; press.push(P); excess.push(P - A.Hmin[v][t]); });
       else A.turns.forEach(T => { if (A.F[v][T.t] > 1e-9) press.push(T.Hp - p.z - T.lossT[i]); });
       const pMin = press.length ? Math.min(...press) : NaN, pMax = press.length ? Math.max(...press) : NaN;
       const notes = [];
       if (ts.length){
-        const excess = pMax - Z.Hzone;
-        if (excess > Math.max(2, 0.15*Z.Hzone)) notes.push(`Dư tới ${fmt(excess,1)} m: lắp van điều áp hoặc khóa bớt van đầu khu`);
+        const ex = Math.max(...excess), need = Math.max(...ts.map(t => A.Hmax[v][t]));
+        if (ex > Math.max(2, 0.15*need)) notes.push(`Dư tới ${fmt(ex,1)} m: lắp van điều áp hoặc khóa bớt van đầu khu`);
         else notes.push("Đủ áp cho khu");
       }
       const zPar = tree.zNode[r.from], zKids = tree.kids[v].map(k => tree.rows[k].z);
@@ -1211,30 +1328,31 @@ function calcSystem(){
       if (zKids.length && r.z < zPar && zKids.every(z => r.z < z)) notes.push("Điểm trũng: lắp van xả cặn");
       if (!zKids.length) notes.push("Cuối nhánh: lắp van xả cặn");
       const pTxt = press.length ? (Math.abs(pMax - pMin) < 0.05 ? `${fmt(pMin,1)} m · ${fmt(bar(pMin),1)} bar` : `${fmt(pMin,1)}–${fmt(pMax,1)} m`) : "–";
+      const needTxt = ts.length ? fmt(Math.max(...ts.map(t => A.Hmax[v][t])),1) : fmt(ctx.minP,1);
       return `<tr><td>Đ${v}</td><td>${ptName(r.from)}</td><td>${fmt0(tree.dist[v])}</td><td>${fmt(r.z,1)}</td><td>Ø${sizes[A.size[i]].od}</td><td>${fmt(A.Qd[v],1)}</td>
-        <td>${r.n > 0 ? fmtN(r.n) : '–'}</td><td>${ts.length ? ts.map(t => t+1).join(", ") : '–'}</td><td>${pTxt}</td><td>${ts.length ? fmt(Z.Hzone,1) : fmt(ctx.minP,1)}</td><td class="wrap">${notes.join("; ")}</td></tr>`;
+        <td class="l">${zonesAt[v].map(z => esc(z.name)).join(", ") || '–'}</td><td>${ts.length ? ts.map(t => t+1).join(", ") : '–'}</td><td>${pTxt}</td><td>${needTxt}</td><td class="wrap">${notes.join("; ")}</td></tr>`;
     }).join("");
+    const pumpZones = zonesAt[0].length ? `<p class="help">Khu nối ngay tại bơm: ${zonesAt[0].map(z => esc(z.name)).join(", ")}.</p>` : "";
 
-    // allowed loss trade-off for this plan
+    // allowed loss trade-off for this plan (computed when opened)
     const Js = SEL.jOpen ? [...new Set([1, 1.5, 2, 3, 4, 6, ctx.J])].filter(j => j > 0).sort((a,b) => a-b) : [];
-    const scen = Js.map(j => j === ctx.J ? A : evalAlt(ctx, A.K, {J:j}));
+    const scen = Js.map(j => j === ctx.J ? A : evalAlt(ctx, A.plan, {J:j}));
     const okS = scen.filter(s => s.ok), bestS = okS.length ? Math.min(...okS.map(s => s.total)) : null;
     const scenRows = scen.map((s, k) => s.ok
-      ? `<tr class="${Js[k]===ctx.J?'pick':''}"><td>${fmt(Js[k],1)} m/100 m</td><td>${money(s.pipeCost)}</td><td>${fmt(s.TDHmax,1)} m</td><td>${s.pickHP} HP · ${money(s.pumpCost)}</td><td>${money(s.energyYear)}</td><td>${money(s.total)}${s.total===bestS?' ★':''}</td></tr>`
+      ? `<tr class="${Js[k]===ctx.J?'pick':''}"><td>${fmt(Js[k],1)} m/100 m</td><td>${money(s.pipeCost)}</td><td>${fmt(s.TDHmax,1)} m</td><td>${hp(s.pickHP)} HP · ${money(s.pumpCost)}</td><td>${money(s.energyYear)}</td><td>${money(s.total)}${s.total===bestS?' ★':''}</td></tr>`
       : `<tr><td>${fmt(Js[k],1)} m/100 m</td><td colspan="5" style="text-align:left">Không có cách phối ống nào đạt</td></tr>`).join("");
 
     detailHtml = `<div class="seg">
-      <div class="seg-head"><h3>Ống chính &amp; nhánh: ${A.K} lượt (${perTurnText(U, A.K)})</h3><span class="badge b-ok">Đạt</span></div>
-      <div class="meta">Tổng chiều dài ${fmt0(tree.rows.reduce((a,r)=>a+r.L,0))} m · tuyến dài nhất ${fmt0(Math.max(...tree.dist))} m · phần cột áp dành cho tổn thất: ${fmt(A.B,1)} m (${fmt(ctx.J,1)} m/100 m) · ${CATALOG[ctx.mat].name}</div>
+      <div class="seg-head"><h3>Ống chính &amp; nhánh: ${A.label} (${countsText(A.plan, U)})</h3><span class="badge b-ok">Đạt</span></div>
+      <div class="meta">Tổng chiều dài ${fmt0(tree.rows.reduce((a,r)=>a+r.L,0))} m · tuyến dài nhất ${fmt0(Math.max(0, ...tree.dist))} m · phần cột áp dành cho tổn thất: ${fmt(A.B,1)} m (${fmt(ctx.J,1)} m/100 m) · ${CATALOG[ctx.mat].name}</div>
       <h3>Lịch tưới</h3>
       <div class="table-wrap"><table>
-        <thead><tr><th>Lượt</th><th class="wrap">Khu mở cùng lúc</th><th>Q (m³/h)</th><th>Cột áp bơm (m)</th><th>Công suất (kW)</th></tr></thead>
+        <thead><tr><th>Lượt</th><th class="wrap">Khu mở cùng lúc</th><th>Q (m³/h)</th><th>Cột áp bơm (m)</th><th>Công suất (kW)</th><th>Thời gian (giờ)</th></tr></thead>
         <tbody>${schedRows}</tbody></table></div>
-      <p class="help">Bơm chọn theo lượt nặng nhất. Lượt nhẹ hơn có thể khóa bớt van tổng hoặc dùng biến tần để giảm áp, tiết kiệm điện.</p>
-      <h3>Cỡ ống từng đoạn (đi to trước, nhỏ dần)</h3>
-      ${rowHtml}
-      ${saveHtml}
-      <div class="viz">
+      <p class="help">Bơm chọn theo lượt nặng nhất. Lượt kéo dài bằng khu tưới lâu nhất trong lượt; khu nào đủ nước thì khóa van khu đó. Lượt nhẹ hơn có thể khóa bớt van tổng hoặc dùng biến tần để giảm áp, tiết kiệm điện.</p>
+      ${tree.rows.length ? `<h3>Cỡ ống từng đoạn (đi to trước, nhỏ dần)</h3>${rowHtml}${saveHtml}` : ''}
+      ${pumpZones}
+      ${lastProfile ? `<div class="viz">
         <div class="ttl">Mặt cắt dọc tuyến ống</div>
         <div class="chart-ctrl">
           <label>Tuyến <select id="pathSel">${pathOpts}</select></label>
@@ -1249,8 +1367,8 @@ function calcSystem(){
         <div id="profile" style="position:relative"></div>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Điểm</th><th>Đi từ</th><th>Cách bơm (m)</th><th>Cao độ (m)</th><th>Ống vào</th><th>Q (m³/h)</th><th>Khu</th><th>Lượt</th><th>Áp khi tưới</th><th>Áp cần (m)</th><th class="wrap">Ghi chú</th></tr></thead>
-        <tbody>${nodeRows}</tbody></table></div>
+        <thead><tr><th>Điểm</th><th>Đi từ</th><th>Cách bơm (m)</th><th>Cao độ (m)</th><th>Ống vào</th><th>Q (m³/h)</th><th class="l">Khu</th><th>Lượt</th><th>Áp khi tưới</th><th>Áp cần (m)</th><th class="wrap">Ghi chú</th></tr></thead>
+        <tbody>${nodeRows}</tbody></table></div>` : ''}
       <details id="jDet" ${SEL.jOpen ? 'open' : ''}><summary>So sánh: tổn thất cho phép ↔ tiền ống ↔ bơm ↔ tiền điện</summary>
         <p class="help">Cho phép tổn thất lớn thì ống nhỏ và rẻ hơn, nhưng bơm phải đẩy cao hơn và tốn điện hơn. Dấu ★ là phương án rẻ nhất sau ${ctx.years} năm.</p>
         <div class="table-wrap"><table>
@@ -1260,7 +1378,7 @@ function calcSystem(){
     </div>`;
   } else {
     lastProfile = null;
-    detailHtml = `<div class="seg"><div class="seg-head"><h3>Ống chính &amp; nhánh: ${A.K} lượt</h3><span class="badge b-bad">Chưa tính được</span></div>
+    detailHtml = `<div class="seg"><div class="seg-head"><h3>Ống chính &amp; nhánh: ${A.label}</h3><span class="badge b-bad">Chưa tính được</span></div>
       <div class="note">${A.reason === "velocity"
         ? `Đoạn tới Đ${A.worst.node} mang ${fmt(A.worst.Q,1)} m³/h, vượt cỡ lớn nhất của ${CATALOG[ctx.mat].name} với vận tốc ≤ ${fmt(ctx.vmax,1)} m/s. Hãy tăng số lượt tưới, đổi vật liệu có cỡ lớn hơn, hoặc tách thêm đường ống từ bơm.`
         : `Không có cách phối cỡ ống nào đủ áp. Thử tăng "Tổn thất cho phép ống chính" hoặc tăng số lượt tưới.`}</div></div>`;
@@ -1268,12 +1386,15 @@ function calcSystem(){
 
   const pressNote = A.ok && A.TDHmax > 60
     ? `<div class="note">Cột áp bơm khá cao (${fmt0(A.TDHmax)} m ≈ ${fmt(bar(A.TDHmax),1)} bar). Cân nhắc đặt bơm tăng áp giữa tuyến, chia khu theo độ cao, hoặc giảm tổn thất cho phép để tăng cỡ ống.</div>` : "";
+  const badZones = ZONES.filter((z, i) => !ctx.designs[i].ok).map(z => esc(z.name));
+  const zoneWarn = badZones.length ? `<div class="note">Ống trong khu chưa đạt ở: ${badZones.join(", ")}. Xem phần “Các khu tưới” bên dưới.</div>` : "";
 
-  $("out").innerHTML = `<h2>Kết quả: ${A.K} lượt tưới${best && A.K === best.K ? ' ★' : ''}${A.hard ? ' ⚠' : ''}</h2>${kpis}${pressNote}${zoneLine}
+  $("out").innerHTML = `<h2>Kết quả: ${A.label}${best && A.id === best.id ? ' ★' : ''}${A.hard ? ' ⚠' : ''}</h2>${kpis}${pressNote}${zoneWarn}${farmLine}
     ${cmpHtml}
     ${detailHtml}
-    <h3 style="margin-top:18px">Thiết kế trong 1 khu (giống nhau mọi phương án)</h3>
-    ${zoneHtml}
+    <div class="seg"><div class="seg-head"><h3>Các khu tưới</h3></div>
+      <div class="meta">Bấm tên khu để xem chi tiết và sửa ở khung bên trái.</div>
+      ${zoneSummary(ctx, A.ok ? A : null)}${zoneCards(ctx)}</div>
     <p class="help" style="margin-top:12px">Lắp van khóa đầu mỗi khu, van xả khí ở các điểm cao, van xả cặn ở điểm trũng và cuối nhánh. Chọn cấp áp PN theo từng đoạn như trên. Đoạn thấp hơn chịu áp lớn hơn.</p>`;
   drawCompare();
   drawProfile();
@@ -1310,8 +1431,11 @@ function calcOne(){
     ${lineCard("Đoạn ống", `${cat.name} · dài ${fmt0(L)} m · chênh cao ${dz>0?'+':''}${fmt(dz,1)} m · ${multi ? N + ' cửa ra' : 'dẫn thẳng'}`, seg)}`;
 }
 
-/* ================== Network table UI ================== */
+/* ================== Network & zone tables ================== */
 function renderNet(){
+  const R = NET.length;
+  const names = Array.from({length:R+1}, () => []);
+  ZONES.forEach(z => names[clampPoint(z.point, R)].push(z.name));
   $("netBody").innerHTML = NET.map((r, i) => {
     const opts = Array.from({length:i+1}, (_, v) => `<option value="${v}" ${v===r.from?'selected':''}>${ptName(v)}</option>`).join("");
     return `<tr>
@@ -1319,68 +1443,156 @@ function renderNet(){
       <td><select data-i="${i}" data-k="from" aria-label="Đoạn tới Đ${i+1} đi từ">${opts}</select></td>
       <td><input type="number" min="0" step="10" value="${r.L}" data-i="${i}" data-k="L" aria-label="Dài đoạn tới Đ${i+1}"></td>
       <td><input type="number" step="0.5" value="${r.z}" data-i="${i}" data-k="z" aria-label="Cao độ Đ${i+1}"></td>
-      <td><input type="number" min="0" step="0.5" value="${r.n}" data-i="${i}" data-k="n" aria-label="Số khu ở Đ${i+1}"></td>
-      <td><button class="btn-x" type="button" data-del="${i}" aria-label="Xóa đoạn tới Đ${i+1}">×</button></td>
+      <td class="zl">${names[i+1].map(esc).join(", ") || "–"}</td>
+      <td><button class="btn-x del" type="button" data-del="${i}" aria-label="Xóa đoạn tới Đ${i+1}">×</button></td>
     </tr>`;
   }).join("");
 }
+function renderZones(){
+  const R = NET.length;
+  $("zoneBody").innerHTML = ZONES.map((z, i) => {
+    const opts = Array.from({length:R+1}, (_, v) => `<option value="${v}" ${v===clampPoint(z.point, R)?'selected':''}>${ptName(v)}</option>`).join("");
+    return `<tr class="${i===ZSEL?'sel':''}">
+      <td><input type="text" value="${esc(z.name)}" data-zi="${i}" data-k="name" aria-label="Tên khu"></td>
+      <td><select data-zi="${i}" data-k="point" aria-label="Khu ${esc(z.name)} nối vào">${opts}</select></td>
+      <td><input type="number" min="1" step="1" value="${esc(z.count)}" data-zi="${i}" data-k="count" aria-label="Số khu giống nhau"></td>
+      <td class="manual-only"><input type="number" min="1" step="1" value="${esc(z.turn || 1)}" data-zi="${i}" data-k="turn" aria-label="Lượt tưới"></td>
+      <td style="white-space:nowrap"><button class="btn-x" type="button" data-edit="${i}" title="Sửa chi tiết" aria-label="Sửa ${esc(z.name)}">✎</button><button class="btn-x" type="button" data-dup="${i}" title="Nhân bản" aria-label="Nhân bản ${esc(z.name)}">⧉</button><button class="btn-x del" type="button" data-zdel="${i}" ${ZONES.length < 2 ? 'disabled' : ''} title="Xóa" aria-label="Xóa ${esc(z.name)}">×</button></td>
+    </tr>`;
+  }).join("");
+  $("zoneTbl").classList.toggle("manual", $("assign").value === "manual");
+}
+function loadZoneToForm(){
+  const z = ZONES[ZSEL]; if (!z) return;
+  for (const f of ZF) $(f).value = z[f] ?? ZDEF[f];
+  $("zeName").textContent = z.name;
+  syncPc();
+}
+function formToZone(){
+  const z = ZONES[ZSEL]; if (!z) return;
+  for (const f of ZF) z[f] = $(f).value;
+}
+function selectZone(i){
+  ZSEL = Math.max(0, Math.min(i, ZONES.length - 1));
+  loadZoneToForm(); renderZones(); recalc();
+}
+
+$("netBody").addEventListener("input", onNetEdit);
+$("netBody").addEventListener("change", onNetEdit);
 function onNetEdit(e){
   const t = e.target; if (!t.dataset.k) return;
   NET[+t.dataset.i][t.dataset.k] = t.dataset.k === "from" ? parseInt(t.value, 10) : (parseFloat(t.value) || 0);
   schedule();
 }
-$("netBody").addEventListener("input", onNetEdit);
-$("netBody").addEventListener("change", onNetEdit);
 $("netBody").addEventListener("click", e => {
   const b = e.target.closest("[data-del]"); if (!b) return;
   const d = +b.dataset.del, delNode = d + 1, up = NET[d].from;
   NET.forEach((r, i) => { if (i !== d && r.from === delNode) r.from = up; });   // children hang on the parent
   NET.splice(d, 1);
   NET.forEach(r => { if (r.from > delNode) r.from -= 1; });
-  renderNet(); schedule();
+  ZONES.forEach(z => { const p = Math.round(+z.point || 0); z.point = p === delNode ? up : (p > delNode ? p - 1 : p); });
+  renderNet(); renderZones(); schedule();
 });
 $("addRow").addEventListener("click", () => {
   const last = NET[NET.length-1];
-  NET.push({from: NET.length, L:100, z: last ? last.z : 0, n:1});
-  renderNet(); schedule();
+  NET.push({from: NET.length, L:100, z: last ? last.z : 0});
+  renderNet(); renderZones(); schedule();
+});
+
+function onZoneEdit(e){
+  const t = e.target, k = t.dataset.k; if (!k || t.dataset.zi == null) return;
+  const z = ZONES[+t.dataset.zi];
+  z[k] = k === "name" ? t.value : (k === "point" ? parseInt(t.value, 10) : t.value);
+  if (k === "name" && +t.dataset.zi === ZSEL) $("zeName").textContent = t.value;
+  if (k === "name" || k === "point") renderNetNamesOnly();
+  schedule();
+}
+function renderNetNamesOnly(){
+  const R = NET.length, names = Array.from({length:R+1}, () => []);
+  ZONES.forEach(z => names[clampPoint(z.point, R)].push(z.name));
+  document.querySelectorAll("#netBody td.zl").forEach((td, i) => td.textContent = names[i+1].join(", ") || "–");
+}
+$("zoneBody").addEventListener("input", onZoneEdit);
+$("zoneBody").addEventListener("change", onZoneEdit);
+$("zoneBody").addEventListener("click", e => {
+  const ed = e.target.closest("[data-edit]"), du = e.target.closest("[data-dup]"), de = e.target.closest("[data-zdel]");
+  if (ed){ selectZone(+ed.dataset.edit); return; }
+  if (du){
+    const i = +du.dataset.dup, src = ZONES[i];
+    ZONES.splice(i + 1, 0, {...src, name: src.name + " (2)"});
+    ZSEL = i + 1; loadZoneToForm(); renderZones(); renderNetNamesOnly(); schedule(); return;
+  }
+  if (de && ZONES.length > 1){
+    const i = +de.dataset.zdel;
+    ZONES.splice(i, 1);
+    if (ZSEL > i) ZSEL--;
+    ZSEL = Math.min(ZSEL, ZONES.length - 1);
+    loadZoneToForm(); renderZones(); renderNetNamesOnly(); schedule(); return;
+  }
+  const tr = e.target.closest("tr");
+  if (tr && !e.target.closest("input,select,button")){
+    const idx = [...$("zoneBody").children].indexOf(tr);
+    if (idx >= 0 && idx !== ZSEL) selectZone(idx);
+  }
+});
+$("addZone").addEventListener("click", () => {
+  const src = ZONES[ZSEL] || ZDEF;
+  ZONES.push({...ZDEF, ...src, name: `Khu ${ZONES.length + 1}`, point: Math.min(NET.length, Math.max(0, +src.point || 0)), count:1, turn:1});
+  ZSEL = ZONES.length - 1; loadZoneToForm(); renderZones(); renderNetNamesOnly(); schedule();
 });
 
 /* ================== Wiring ================== */
 let mode = "sys";
-const STORE = "tinh-ong-tuoi-v3";
+const STORE = "tinh-ong-tuoi-v4";
 const fields = () => document.querySelectorAll("#form-sys input[id], #form-sys select[id], #form-one input[id], #form-one select[id]");
 function save(){
   try {
     const vals = {};
-    fields().forEach(el => vals[el.id] = el.value);
-    localStorage.setItem(STORE, JSON.stringify({vals, net:NET, mode}));
+    fields().forEach(el => { if (!ZF.includes(el.id)) vals[el.id] = el.value; });
+    localStorage.setItem(STORE, JSON.stringify({vals, net:NET, zones:ZONES, zsel:ZSEL, mode}));
   } catch(e) {}
 }
 function restore(){
   try {
     let d = JSON.parse(localStorage.getItem(STORE) || "null");
     if (!d){
-      const old = JSON.parse(localStorage.getItem("tinh-ong-tuoi-v2") || "null");   // earlier version: one straight main line
-      if (old) d = {vals: old.vals, net: (old.segs || []).map((s, i) => ({from:i, L:s.L, z:s.z, n:s.n})), mode: old.mode};
+      // earlier versions: one standard zone design + zone counts on the network rows
+      let old = JSON.parse(localStorage.getItem("tinh-ong-tuoi-v3") || "null");
+      if (!old){
+        const v2 = JSON.parse(localStorage.getItem("tinh-ong-tuoi-v2") || "null");
+        if (v2) old = {vals: v2.vals, net: (v2.segs || []).map((s, i) => ({from:i, L:s.L, z:s.z, n:s.n})), mode: v2.mode};
+      }
+      if (old && Array.isArray(old.net) && old.net.length){
+        const basis = {...ZDEF};
+        for (const f of ZF) if (old.vals && f in old.vals) basis[f] = old.vals[f];
+        const zs = [];
+        old.net.forEach((r, i) => {
+          const n = +r.n || 0, full = Math.floor(n + 1e-9);
+          if (full > 0) zs.push({...basis, name:`Khu Đ${i+1}`, point:i+1, count:full, turn:1});
+          if (n - full > 1e-3) zs.push({...basis, rows: Math.max(1, Math.round((+basis.rows || 1)*(n - full))), name:`Khu nhỏ Đ${i+1}`, point:i+1, count:1, turn:1});
+        });
+        d = {vals: old.vals, net: old.net.map(r => ({from:r.from, L:r.L, z:r.z})), zones: zs.length ? zs : null, mode: old.mode};
+      }
     }
     if (!d) return;
-    for (const [k,v] of Object.entries(d.vals || {})) if ($(k) && k !== "turns") $(k).value = v;
+    for (const [k,v] of Object.entries(d.vals || {})) if ($(k) && k !== "turns" && !ZF.includes(k)) $(k).value = v;
     if (d.vals && d.vals.turns) SEL.want = d.vals.turns;
-    if (Array.isArray(d.net) && d.net.length) NET = d.net;
+    if (Array.isArray(d.net) && d.net.length) NET = d.net.map(r => ({from:+r.from || 0, L:+r.L || 0, z:+r.z || 0}));
+    if (Array.isArray(d.zones) && d.zones.length) ZONES = d.zones.map(z => ({...ZDEF, count:1, turn:1, ...z}));
+    if (d.zsel != null) ZSEL = Math.min(Math.max(0, +d.zsel || 0), ZONES.length - 1);
     if (d.mode) mode = d.mode;
   } catch(e) {}
 }
 function recalc(){
   try { mode === "sys" ? calcSystem() : calcOne(); }
-  catch(e){ $("out").innerHTML = `<p class="note">Lỗi: ${e.message}</p>`; console.error(e); }
+  catch(e){ $("out").innerHTML = `<p class="note">Lỗi: ${esc(e.message)}</p>`; console.error(e); }
   save();
 }
 let tmr; function schedule(){ clearTimeout(tmr); tmr = setTimeout(recalc, 150); }
 
 function applyPreset(p){
   for (const [k,v] of Object.entries(p)) if ($(k)) $(k).value = v;
-  syncPc();
-  recalc();
+  syncPc(); formToZone(); recalc();
 }
 
 fillMatSelect($("matLat"), "ldpe");
@@ -1388,18 +1600,23 @@ fillMatSelect($("matSub"), "pvc");
 fillMatSelect($("matMain"), "pvc");
 fillMatSelect($("oMat"), "pvc");
 restore();
-renderNet();
+renderNet(); renderZones(); loadZoneToForm();
 
 document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(PRESETS[b.dataset.preset])));
-fields().forEach(el => el.addEventListener("input", schedule));
+fields().forEach(el => el.addEventListener("input", () => { if (ZF.includes(el.id)) formToZone(); schedule(); }));
 
 $("type").addEventListener("change", () => {
   if ($("type").value === "bec"){ if (num("qe") < 20) $("qe").value = 90; if (num("He") < 15) $("He").value = 20; if ($("matLat").value === "ldpe") $("matLat").value = "hdpe"; }
   else { if (num("qe") > 20) $("qe").value = 8; if (num("He") > 15) $("He").value = 10; $("matLat").value = "ldpe"; }
-  schedule();
+  formToZone(); schedule();
 });
 function syncPc(){ $("pcMaxWrap").classList.toggle("hidden", $("pc").value !== "1"); }
-$("pc").addEventListener("change", () => { syncPc(); schedule(); });
+$("pc").addEventListener("change", () => { syncPc(); formToZone(); schedule(); });
+$("assign").addEventListener("change", () => {
+  const manual = $("assign").value === "manual";
+  $("zoneTbl").classList.toggle("manual", manual);
+  if (manual) SEL.want = "m";             // show the hand-made schedule once it is listed
+});
 function syncQmode(){
   const e = $("oQmode").value === "emit";
   document.querySelectorAll(".o-emit").forEach(x => x.classList.toggle("hidden", !e));
@@ -1407,10 +1624,12 @@ function syncQmode(){
 }
 $("oQmode").addEventListener("change", () => { syncQmode(); schedule(); });
 
-// results area: choose a plan, change the profile route / turn
+// results area: choose a plan or zone, change the profile route / turn
 $("out").addEventListener("click", e => {
+  const z = e.target.closest("[data-zsel]");
+  if (z){ selectZone(+z.dataset.zsel); return; }
   const b = e.target.closest("button[data-k], tr.cmp-row[data-k]");
-  if (b) selectK(+b.dataset.k);
+  if (b) selectPlan(b.dataset.k);
 });
 $("out").addEventListener("toggle", e => {
   if (e.target.id !== "jDet") return;
@@ -1438,7 +1657,6 @@ $("tab-sys").addEventListener("click", () => setTab("sys"));
 $("tab-one").addEventListener("click", () => setTab("one"));
 
 syncQmode();
-syncPc();
 setTab(mode);
 </script>
 </body>
