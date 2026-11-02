@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tính Ống Tưới</title>
+<meta name="description" content="Tính đường kính (phi) ống chính, ống nhánh, ống tưới cho hệ thống tưới nhỏ giọt và tưới béc; ước tính cột áp và công suất bơm.">
+<style>
+:root{
+  --bg:#f6f7f4; --card:#ffffff; --ink:#1d2a1f; --muted:#5d6b60; --line:#dde3dc;
+  --accent:#2f7d4a; --accent-ink:#ffffff; --accent-soft:#e3f1e7;
+  --warn:#9a5b00; --warn-soft:#fff3dc; --bad:#b3261e; --bad-soft:#fde7e5; --ok:#2f7d4a;
+  --input:#fbfcfa;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121612; --card:#1b211c; --ink:#e7ede7; --muted:#9caf9f; --line:#2e3830;
+    --accent:#5cbf7d; --accent-ink:#0f1a12; --accent-soft:#1f3326;
+    --warn:#f0b65a; --warn-soft:#352a14; --bad:#ff8a80; --bad-soft:#3a1d1b; --ok:#5cbf7d;
+    --input:#161b17;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121612; --card:#1b211c; --ink:#e7ede7; --muted:#9caf9f; --line:#2e3830;
+  --accent:#5cbf7d; --accent-ink:#0f1a12; --accent-soft:#1f3326;
+  --warn:#f0b65a; --warn-soft:#352a14; --bad:#ff8a80; --bad-soft:#3a1d1b; --ok:#5cbf7d;
+  --input:#161b17;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:1100px;margin:0 auto}
+h1{font-size:1.45rem;margin:0 0 4px}
+header p{margin:0;color:var(--muted)}
+main{max-width:1100px;margin:0 auto;padding:8px 16px 40px;display:grid;gap:16px;grid-template-columns:minmax(0,400px) minmax(0,1fr)}
+@media (max-width:860px){main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{font-size:1.05rem;margin:0 0 10px}
+.card h3{font-size:.95rem;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:8px;border:1px solid var(--line);background:var(--input);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+label{display:block;font-size:.85rem;color:var(--muted)}
+label.full{grid-column:1/-1}
+input,select{width:100%;margin-top:2px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:var(--input);color:var(--ink);font:inherit}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:0}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.presets button{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer}
+details{margin-top:12px}
+summary{cursor:pointer;color:var(--accent);font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:6px}
+.kpi{background:var(--accent-soft);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:1.35rem;font-weight:700}
+.kpi .l{font-size:.8rem;color:var(--muted)}
+.seg{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}
+.seg-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.seg-head h3{margin:0;text-transform:none;letter-spacing:0;color:var(--ink);font-size:1rem}
+.pipe{font-size:1.6rem;font-weight:800;color:var(--accent)}
+.meta{color:var(--muted);font-size:.88rem}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.78rem;font-weight:600}
+.b-ok{background:var(--accent-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:.88rem}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin-top:8px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr.pick td{background:var(--accent-soft);font-weight:700}
+.muted{color:var(--muted)}
+.help{font-size:.85rem;color:var(--muted)}
+.help li{margin-bottom:4px}
+footer{max-width:1100px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:.8rem}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>Tính ống tưới nhỏ giọt &amp; tưới béc</h1>
+  <p>Chọn phi (Ø) ống chính, ống nhánh, ống tưới theo lưu lượng – vận tốc – tổn thất áp; ước tính bơm.</p>
+</header>
+
+<main>
+<section class="card" aria-label="Thông số đầu vào">
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-sys" aria-selected="true">Cả hệ thống</button>
+    <button role="tab" id="tab-one" aria-selected="false">Tính nhanh 1 đoạn</button>
+  </div>
+
+  <!-- ========== SYSTEM MODE ========== -->
+  <div id="form-sys">
+    <div class="presets" aria-label="Mẫu có sẵn">
+      <button data-preset="cafe_drip">Cà phê – nhỏ giọt</button>
+      <button data-preset="cafe_bec">Cà phê – béc gốc</button>
+      <button data-preset="tieu_drip">Tiêu – nhỏ giọt</button>
+      <button data-preset="saurieng_bec">Sầu riêng – béc</button>
+    </div>
+
+    <h3>Kiểu tưới &amp; đầu tưới</h3>
+    <div class="grid2">
+      <label class="full">Kiểu tưới
+        <select id="type">
+          <option value="drip">Nhỏ giọt</option>
+          <option value="bec">Béc (phun mưa gốc / mini sprinkler)</option>
+        </select>
+      </label>
+      <label>Số đầu tưới / cây
+        <input id="ePerTree" type="number" min="1" step="1" value="2">
+      </label>
+      <label>Lưu lượng 1 đầu (lít/giờ)
+        <input id="qe" type="number" min="0.5" step="0.5" value="8">
+      </label>
+      <label>Áp làm việc đầu tưới (m cột nước)
+        <input id="He" type="number" min="1" step="1" value="10">
+      </label>
+      <label>Đầu tưới bù áp?
+        <select id="pc">
+          <option value="0">Không</option>
+          <option value="1">Có (bù áp)</option>
+        </select>
+      </label>
+    </div>
+
+    <h3>Bố trí vườn (1 khu tưới)</h3>
+    <div class="grid2">
+      <label>Khoảng cách hàng (m)
+        <input id="rowSp" type="number" min="0.5" step="0.1" value="3">
+      </label>
+      <label>Khoảng cách cây (m)
+        <input id="treeSp" type="number" min="0.3" step="0.1" value="3">
+      </label>
+      <label>Số cây / hàng
+        <input id="treesPerRow" type="number" min="1" step="1" value="50">
+      </label>
+      <label>Số hàng / khu tưới
+        <input id="rows" type="number" min="1" step="1" value="30">
+      </label>
+      <label>Số khu tưới (tưới luân phiên)
+        <input id="zones" type="number" min="1" step="1" value="4">
+      </label>
+      <label>Ống nhánh cấp nước vào hàng
+        <select id="feed">
+          <option value="end">Ở đầu hàng</option>
+          <option value="mid">Ở giữa hàng (chia 2 phía)</option>
+        </select>
+      </label>
+    </div>
+
+    <h3>Ống chính &amp; bơm</h3>
+    <div class="grid2">
+      <label>Chiều dài ống chính (m)
+        <input id="Lmain" type="number" min="0" step="10" value="200">
+      </label>
+      <label>Chênh cao: mặt nước → điểm cao nhất (m)
+        <input id="Hstatic" type="number" step="1" value="8">
+      </label>
+      <label>Tổn thất bộ lọc + châm phân (m)
+        <input id="Hfilter" type="number" min="0" step="1" value="5">
+      </label>
+      <label>Hiệu suất bơm (%)
+        <input id="eta" type="number" min="20" max="90" step="5" value="60">
+      </label>
+      <label>Lượng nước / gốc / lần tưới (lít)
+        <input id="litersPerTree" type="number" min="0" step="5" value="40">
+      </label>
+    </div>
+
+    <h3>Vật liệu ống</h3>
+    <div class="grid2">
+      <label>Ống tưới (dọc hàng)
+        <select id="matLat"></select>
+      </label>
+      <label>Ống nhánh (cấp 2)
+        <select id="matSub"></select>
+      </label>
+      <label>Ống chính
+        <select id="matMain"></select>
+      </label>
+    </div>
+
+    <details>
+      <summary>Tiêu chí thiết kế (nâng cao)</summary>
+      <div class="grid2" style="margin-top:8px">
+        <label>Vận tốc tối đa (m/s)
+          <input id="vmax" type="number" min="0.5" max="3" step="0.1" value="1.5">
+        </label>
+        <label>Dao động áp cho phép trong khu (%)
+          <input id="allowPct" type="number" min="5" max="60" step="1" value="20">
+        </label>
+        <label>Phần dành cho ống tưới (%)
+          <input id="latShare" type="number" min="20" max="80" step="5" value="55">
+        </label>
+        <label>Dốc thủy lực tối đa ống chính (m/100m)
+          <input id="Jmain" type="number" min="0.5" max="10" step="0.5" value="2">
+        </label>
+        <label>Tổn thất cục bộ (co, tê, van) (%)
+          <input id="minor" type="number" min="0" max="50" step="5" value="10">
+        </label>
+      </div>
+      <p class="help">Đầu tưới thường (không bù áp): giữ dao động áp ≤ 20% để lưu lượng các đầu chênh ≤ ~10%. Đầu bù áp cho phép dao động lớn hơn (thường 40–50%).</p>
+    </details>
+  </div>
+
+  <!-- ========== ONE SEGMENT MODE ========== -->
+  <div id="form-one" class="hidden">
+    <div class="grid2">
+      <label class="full">Cách nhập lưu lượng
+        <select id="oQmode">
+          <option value="emit">Số đầu tưới × lưu lượng đầu</option>
+          <option value="m3h">Nhập trực tiếp (m³/giờ)</option>
+        </select>
+      </label>
+      <label class="o-emit">Số đầu tưới trên đoạn
+        <input id="oN" type="number" min="1" step="1" value="200">
+      </label>
+      <label class="o-emit">Lưu lượng 1 đầu (lít/giờ)
+        <input id="oQe" type="number" min="0.5" step="0.5" value="8">
+      </label>
+      <label class="o-m3h hidden">Lưu lượng (m³/giờ)
+        <input id="oQ" type="number" min="0.01" step="0.1" value="5">
+      </label>
+      <label>Chiều dài đoạn ống (m)
+        <input id="oL" type="number" min="1" step="1" value="100">
+      </label>
+      <label>Kiểu chia nước
+        <select id="oOut">
+          <option value="multi">Nhiều cửa ra rải đều</option>
+          <option value="single">Dẫn thẳng, ra 1 điểm cuối</option>
+        </select>
+      </label>
+      <label>Vật liệu ống
+        <select id="oMat"></select>
+      </label>
+      <label>Vận tốc tối đa (m/s)
+        <input id="oV" type="number" min="0.5" max="3" step="0.1" value="1.5">
+      </label>
+      <label class="full">Tổn thất áp tối đa cho phép trên đoạn (m) — để trống nếu chỉ xét vận tốc
+        <input id="oH" type="number" min="0" step="0.5" value="">
+      </label>
+    </div>
+  </div>
+</section>
+
+<section aria-live="polite">
+  <div class="card" id="out"></div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Cách tính</h2>
+    <ul class="help">
+      <li><b>Lưu lượng</b> mỗi đoạn = số đầu tưới phía sau đoạn đó × lưu lượng 1 đầu. Các khu tưới chạy luân phiên nên ống chính chỉ mang lưu lượng của 1 khu.</li>
+      <li><b>Đường kính trong tối thiểu</b> theo vận tốc: D = √(4Q / πv). Vận tốc khuyến nghị ≤ 1,5 m/s để hạn chế búa nước và tổn thất.</li>
+      <li><b>Tổn thất áp</b> theo Hazen–Williams: h = 10,67·L·Q<sup>1,852</sup> / (C<sup>1,852</sup>·D<sup>4,87</sup>), nhân hệ số Christiansen F cho ống có nhiều cửa ra rải đều.</li>
+      <li><b>Chọn ống</b>: lấy cỡ nhỏ nhất trong danh mục thỏa đồng thời vận tốc và tổn thất cho phép. Kích thước thành ống là giá trị điển hình — đối chiếu catalogue nhà sản xuất (Bình Minh, Tiền Phong, Đạt Hòa…) và chọn cấp áp (PN) ≥ áp bơm.</li>
+      <li><b>Bơm</b>: H = áp đầu tưới + tổn thất ống tưới + ống nhánh + ống chính + lọc/châm phân + chênh cao; P = 9,81·Q·H / η.</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer>Kết quả mang tính tham khảo cho thiết kế sơ bộ. Với địa hình dốc nhiều, nên chia khu theo đường đồng mức hoặc dùng đầu tưới bù áp.</footer>
+
+<script>
+/* ---------- Pipe catalogues (OD × typical wall, mm) ---------- */
+const CATALOG = {
+  ldpe: { name:"PE mềm / ống nhỏ giọt (LDPE)", C:140,
+    pipes:[[16,1.2],[20,1.5],[25,1.8],[32,2.0]] },
+  hdpe: { name:"HDPE PE100 PN10", C:145,
+    pipes:[[20,2.0],[25,2.0],[32,2.0],[40,2.4],[50,3.0],[63,3.8],[75,4.5],[90,5.4],[110,6.6],[125,7.4],[140,8.3],[160,9.5],[200,11.9]] },
+  pvc: { name:"PVC-U (hệ Bình Minh / Tiền Phong)", C:150,
+    pipes:[[21,1.6],[27,1.8],[34,2.0],[42,2.1],[49,2.4],[60,2.3],[75,2.9],[90,2.9],[114,3.2],[140,4.1],[168,4.3],[200,4.9],[220,5.1]] }
+};
+const MAT_KEYS = Object.keys(CATALOG);
+
+const PRESETS = {
+  cafe_drip:   {type:"drip", ePerTree:2, qe:8,  He:10, pc:"0", rowSp:3, treeSp:3, treesPerRow:50, rows:30, zones:4, feed:"mid", litersPerTree:40,  matLat:"ldpe", matSub:"pvc", matMain:"pvc"},
+  cafe_bec:    {type:"bec",  ePerTree:1, qe:90, He:20, pc:"0", rowSp:3, treeSp:3, treesPerRow:50, rows:20, zones:6, feed:"mid", litersPerTree:250, matLat:"hdpe", matSub:"pvc", matMain:"pvc"},
+  tieu_drip:   {type:"drip", ePerTree:2, qe:4,  He:10, pc:"1", rowSp:2.5, treeSp:2.5, treesPerRow:60, rows:40, zones:4, feed:"mid", litersPerTree:20, matLat:"ldpe", matSub:"pvc", matMain:"pvc"},
+  saurieng_bec:{type:"bec",  ePerTree:2, qe:120,He:20, pc:"0", rowSp:8, treeSp:8, treesPerRow:20, rows:10, zones:5, feed:"end", litersPerTree:300, matLat:"hdpe", matSub:"pvc", matMain:"pvc"}
+};
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+const fmt = (x, d=1) => isFinite(x) ? x.toLocaleString("vi-VN",{minimumFractionDigits:d,maximumFractionDigits:d}) : "–";
+const fmt0 = x => fmt(x,0);
+
+function fillMatSelect(sel, def){
+  sel.innerHTML = MAT_KEYS.map(k=>`<option value="${k}">${CATALOG[k].name}</option>`).join("");
+  sel.value = def;
+}
+
+/* Christiansen multiple-outlet factor (outlet spacing = first outlet distance) */
+function christiansenF(N, m=1.852){
+  if (N <= 1) return 1;
+  return 1/(m+1) + 1/(2*N) + Math.sqrt(m-1)/(6*N*N);
+}
+/* Hazen–Williams head loss (m). Q in m3/s, D in m, L in m */
+function hwLoss(Q, D, L, C){
+  if (Q <= 0 || L <= 0) return 0;
+  return 10.67 * L * Math.pow(Q,1.852) / (Math.pow(C,1.852) * Math.pow(D,4.87));
+}
+
+/* Evaluate every pipe in a catalogue for one segment; pick smallest that passes */
+function designSegment({Qm3h, L, outlets, mat, vmax, hAllow, minorPct=0}){
+  const cat = CATALOG[mat];
+  const Q = Qm3h/3600;
+  const F = christiansenF(outlets);
+  const Dmin = Math.sqrt(4*Q/(Math.PI*vmax)) * 1000; // mm
+  const rows = cat.pipes.map(([od, t]) => {
+    const id = od - 2*t;
+    const D = id/1000;
+    const v = Q / (Math.PI*D*D/4);
+    const h = hwLoss(Q, D, L, cat.C) * F * (1 + minorPct/100);
+    const okV = v <= vmax + 1e-9;
+    const okH = (hAllow == null) || h <= hAllow + 1e-9;
+    return {od, t, id, v, h, okV, okH, ok: okV && okH};
+  });
+  const pick = rows.find(r => r.ok) || null;
+  return {rows, pick, Dmin, F, Q:Qm3h, L, outlets, mat, hAllow};
+}
+
+/* ---------- Rendering ---------- */
+function statusBadge(r, hAllow){
+  if (!r) return `<span class="badge b-bad">Không cỡ nào đạt</span>`;
+  return `<span class="badge b-ok">Đạt</span>`;
+}
+
+function segTable(seg){
+  const pickOd = seg.pick ? seg.pick.od : null;
+  const body = seg.rows.map(r => `
+    <tr class="${r.od===pickOd?'pick':''}">
+      <td>Ø${r.od} × ${fmt(r.t,1)}</td>
+      <td>${fmt(r.id,1)}</td>
+      <td>${fmt(r.v,2)}</td>
+      <td>${fmt(r.h,2)}</td>
+      <td>${r.okV ? '✓' : '<span style="color:var(--bad)">✗</span>'}</td>
+      <td>${seg.hAllow==null ? '–' : (r.okH ? '✓' : '<span style="color:var(--bad)">✗</span>')}</td>
+    </tr>`).join("");
+  return `<details><summary>Xem so sánh các cỡ ống</summary>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Ống (OD × dày)</th><th>Ø trong (mm)</th><th>v (m/s)</th><th>Tổn thất (m)</th><th>v đạt</th><th>Áp đạt</th></tr></thead>
+      <tbody>${body}</tbody></table></div></details>`;
+}
+
+function segCard(title, sub, seg, extraNote=""){
+  const p = seg.pick;
+  const head = p
+    ? `<div class="pipe">Ø${p.od} <span class="meta">mm</span></div>`
+    : `<div class="pipe" style="color:var(--bad)">&gt; Ø${seg.rows[seg.rows.length-1].od}</div>`;
+  const detail = p
+    ? `Ø trong ${fmt(p.id,1)} mm · chu vi ngoài ${fmt(Math.PI*p.od,0)} mm · v = ${fmt(p.v,2)} m/s · tổn thất ${fmt(p.h,2)} m`
+    : `Cần Ø trong ≥ ${fmt(seg.Dmin,1)} mm theo vận tốc nhưng danh mục ${CATALOG[seg.mat].name} không đủ lớn hoặc tổn thất vượt mức cho phép.`;
+  const note = !p ? `<div class="note">Gợi ý: đổi sang vật liệu có cỡ lớn hơn, chia nhỏ khu tưới, rút ngắn hàng, hoặc cấp nước ở giữa hàng.</div>` : extraNote;
+  return `<div class="seg">
+    <div class="seg-head"><h3>${title}</h3>${statusBadge(p)}</div>
+    <div class="meta">${sub}</div>
+    ${head}
+    <div class="meta">${detail}</div>
+    <div class="meta">Lưu lượng ${fmt(seg.Q,2)} m³/h (${fmt(seg.Q/3.6,2)} lít/giây) · dài ${fmt0(seg.L)} m · ${seg.outlets>1?seg.outlets.toLocaleString("vi-VN")+' cửa ra (F = '+fmt(seg.F,3)+')':'dẫn thẳng'}${seg.hAllow!=null?' · tổn thất cho phép '+fmt(seg.hAllow,2)+' m':''}</div>
+    ${note}
+    ${segTable(seg)}
+  </div>`;
+}
+
+function calcSystem(){
+  const ePerTree = Math.max(1, Math.round(num("ePerTree")));
+  const qe = num("qe");                       // L/h
+  const He = num("He");                       // m
+  const rowSp = num("rowSp"), treeSp = num("treeSp");
+  const treesPerRow = Math.max(1, Math.round(num("treesPerRow")));
+  const rows = Math.max(1, Math.round(num("rows")));
+  const zones = Math.max(1, Math.round(num("zones")));
+  const mid = $("feed").value === "mid";
+  const vmax = num("vmax") || 1.5;
+  const allowPct = num("allowPct");
+  const latShare = num("latShare")/100;
+  const minor = num("minor");
+
+  const hAllowTotal = He * allowPct/100;
+  const hAllowLat = hAllowTotal * latShare;
+  const hAllowSub = hAllowTotal - hAllowLat;
+
+  // Lateral: one per row (or two halves if fed from middle)
+  const rowLen = treesPerRow * treeSp;
+  const latLen = mid ? rowLen/2 : rowLen;
+  const latOutlets = Math.max(1, Math.round((mid ? treesPerRow/2 : treesPerRow) * ePerTree));
+  const latQ = latOutlets * qe / 1000; // m3/h
+  const lat = designSegment({Qm3h:latQ, L:latLen, outlets:latOutlets, mat:$("matLat").value, vmax, hAllow:hAllowLat});
+
+  // Sub-main: across rows, feeds every lateral
+  const zoneTrees = treesPerRow * rows;
+  const zoneQ = zoneTrees * ePerTree * qe / 1000; // m3/h
+  const subLen = rows * rowSp;
+  const sub = designSegment({Qm3h:zoneQ, L:subLen, outlets:rows, mat:$("matSub").value, vmax, hAllow:hAllowSub, minorPct:minor});
+
+  // Main: carries one zone's flow; limit hydraulic gradient
+  const Lmain = num("Lmain");
+  const Jmax = num("Jmain");
+  const main = designSegment({Qm3h:zoneQ, L:Lmain, outlets:1, mat:$("matMain").value, vmax, hAllow: Lmain>0 ? Jmax*Lmain/100 : null, minorPct:minor});
+
+  // Pump
+  const hLat = lat.pick ? lat.pick.h : NaN;
+  const hSub = sub.pick ? sub.pick.h : NaN;
+  const hMain = main.pick ? main.pick.h : NaN;
+  const Htot = He + hLat + hSub + hMain + num("Hfilter") + num("Hstatic");
+  const eta = Math.max(0.2, num("eta")/100);
+  const kW = 9.81 * (zoneQ/3600) * Htot / eta;
+  const HP = kW / 0.746;
+  const stdHP = [0.5,1,1.5,2,3,4,5,5.5,7.5,10,15,20,25,30,40,50,60,75,100];
+  const pickHP = stdHP.find(h => h >= HP*1.1) || Math.ceil(HP*1.1);
+
+  // Schedule
+  const lpt = num("litersPerTree");
+  const hoursPerZone = lpt>0 ? lpt / (ePerTree*qe) : 0;
+  const areaHa = zoneTrees * rowSp * treeSp / 10000;
+
+  const pressNote = isFinite(Htot) && Htot > 60
+    ? `<div class="note">Cột áp bơm khá cao (${fmt(Htot,0)} m ≈ ${fmt(Htot/10.2,1)} bar). Chọn ống chính có cấp áp ≥ PN${Htot/10.2>8?10:8} và cân nhắc tăng cỡ ống chính để giảm tổn thất.</div>` : "";
+
+  const kpis = `<div class="kpis">
+    <div class="kpi"><div class="v">${fmt(zoneQ,2)} m³/h</div><div class="l">Lưu lượng 1 khu (${fmt(zoneQ/3.6,2)} lít/giây)</div></div>
+    <div class="kpi"><div class="v">${fmt(Htot,1)} m</div><div class="l">Cột áp bơm cần (≈ ${fmt(Htot/10.2,1)} bar)</div></div>
+    <div class="kpi"><div class="v">${fmt(kW,2)} kW</div><div class="l">Công suất trục (${fmt(HP,1)} HP) → chọn ~${pickHP} HP</div></div>
+    <div class="kpi"><div class="v">${fmt(hoursPerZone,1)} giờ</div><div class="l">Thời gian tưới 1 khu · ${zones} khu = ${fmt(hoursPerZone*zones,1)} giờ</div></div>
+  </div>
+  <p class="meta">1 khu: ${zoneTrees.toLocaleString("vi-VN")} cây · ${(zoneTrees*ePerTree).toLocaleString("vi-VN")} đầu tưới · ${fmt(areaHa,2)} ha. Toàn vườn: ${(zoneTrees*zones).toLocaleString("vi-VN")} cây · ${fmt(areaHa*zones,2)} ha · tổn thất cho phép trong khu ${fmt(hAllowTotal,2)} m.</p>`;
+
+  const latNote = (mid ? `<div class="meta">Cấp ở giữa: mỗi hàng chia 2 nhánh, mỗi nhánh dài ${fmt0(latLen)} m.</div>` : "");
+  const html = `<h2>Kết quả</h2>${kpis}${pressNote}
+    ${segCard("1. Ống tưới (dọc hàng cây)", `Mỗi ${mid?'nửa ':''}hàng: ${latOutlets} đầu × ${fmt(qe,1)} lít/giờ`, lat, latNote)}
+    ${segCard("2. Ống nhánh (cấp 2, chạy ngang các hàng)", `Cấp cho ${rows} hàng, dài ${fmt0(subLen)} m`, sub)}
+    ${Lmain>0 ? segCard("3. Ống chính (từ bơm đến khu tưới)", `Dẫn lưu lượng 1 khu, dài ${fmt0(Lmain)} m · dốc thủy lực ≤ ${fmt(Jmax,1)} m/100 m`, main) : ""}
+    <p class="help" style="margin-top:12px">Lắp van khóa ở đầu mỗi khu tưới, van xả khí ở điểm cao và van xả cặn ở cuối ống nhánh. Chọn cấp áp ống chính (PN) ≥ ${fmt(Math.ceil(Htot/10.2*1.3),0)} bar.</p>`;
+  $("out").innerHTML = html;
+}
+
+function calcOne(){
+  const mode = $("oQmode").value;
+  const outlets = mode === "emit" ? Math.max(1, Math.round(num("oN"))) : 1;
+  const Q = mode === "emit" ? outlets * num("oQe") / 1000 : num("oQ");
+  const multi = $("oOut").value === "multi" && mode === "emit";
+  const hRaw = $("oH").value.trim();
+  const hAllow = hRaw === "" ? null : parseFloat(hRaw);
+  const seg = designSegment({Qm3h:Q, L:num("oL"), outlets: multi ? outlets : 1, mat:$("oMat").value, vmax:num("oV")||1.5, hAllow});
+  $("out").innerHTML = `<h2>Kết quả</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="v">${fmt(Q,2)} m³/h</div><div class="l">${fmt(Q/3.6,2)} lít/giây</div></div>
+      <div class="kpi"><div class="v">${fmt(seg.Dmin,1)} mm</div><div class="l">Ø trong tối thiểu theo vận tốc</div></div>
+    </div>
+    ${segCard("Đoạn ống", CATALOG[seg.mat].name, seg)}`;
+}
+
+/* ---------- Wiring ---------- */
+let mode = "sys";
+function recalc(){ try { mode==="sys" ? calcSystem() : calcOne(); } catch(e){ $("out").innerHTML = `<p class="note">Lỗi: ${e.message}</p>`; } }
+
+function applyPreset(p){
+  for (const [k,v] of Object.entries(p)) if ($(k)) $(k).value = v;
+  $("allowPct").value = p.pc === "1" ? 45 : 20;
+  recalc();
+}
+
+fillMatSelect($("matLat"), "ldpe");
+fillMatSelect($("matSub"), "pvc");
+fillMatSelect($("matMain"), "pvc");
+fillMatSelect($("oMat"), "pvc");
+
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => applyPreset(PRESETS[b.dataset.preset])));
+document.querySelectorAll("input,select").forEach(el => el.addEventListener("input", recalc));
+
+$("type").addEventListener("change", () => {
+  // sensible defaults when switching type
+  if ($("type").value === "bec"){ if (num("qe") < 20) $("qe").value = 90; if (num("He") < 15) $("He").value = 20; if ($("matLat").value==="ldpe") $("matLat").value="hdpe"; }
+  else { if (num("qe") > 20) $("qe").value = 8; if (num("He") > 15) $("He").value = 10; $("matLat").value="ldpe"; }
+  recalc();
+});
+$("pc").addEventListener("change", () => { $("allowPct").value = $("pc").value === "1" ? 45 : 20; recalc(); });
+$("oQmode").addEventListener("change", () => {
+  const e = $("oQmode").value === "emit";
+  document.querySelectorAll(".o-emit").forEach(x => x.classList.toggle("hidden", !e));
+  document.querySelectorAll(".o-m3h").forEach(x => x.classList.toggle("hidden", e));
+  recalc();
+});
+function setTab(m){
+  mode = m;
+  $("tab-sys").setAttribute("aria-selected", m==="sys");
+  $("tab-one").setAttribute("aria-selected", m==="one");
+  $("form-sys").classList.toggle("hidden", m!=="sys");
+  $("form-one").classList.toggle("hidden", m!=="one");
+  recalc();
+}
+$("tab-sys").addEventListener("click", () => setTab("sys"));
+$("tab-one").addEventListener("click", () => setTab("one"));
+
+recalc();
+</script>
+</body>
+</html>
